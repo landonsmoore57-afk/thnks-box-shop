@@ -44,7 +44,7 @@ const Hero = () => {
                 </Button>
               </Link>
               <Link to="/resellers">
-                <Button size="lg" variant="outline" className="text-base px-8 h-14 border-white/30 text-white hover:bg-white/10 hover:text-white">
+                <Button size="lg" className="text-base px-8 h-14 bg-white text-brand-navy hover:bg-white/90">
                   For Resellers
                 </Button>
               </Link>
