@@ -38,14 +38,14 @@ const TierExplainer = () => {
   ];
 
   return (
-    <section className="py-20 bg-primary text-primary-foreground">
+    <section className="py-24 bg-primary text-primary-foreground">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mb-4">
-            Three Tiers, One Simple Choice
+        <div className="text-center mb-16 max-w-4xl mx-auto">
+          <h2 className="font-serif text-5xl font-bold mb-6">
+            Three Tiers, Perfectly Scaled
           </h2>
-          <p className="text-xl text-primary-foreground/80 max-w-3xl mx-auto">
-            Every gift box is available in Basic, Standard, and Elite tiers. Same theme, scaled quality and pricing to match your budget and occasion.
+          <p className="text-xl text-primary-foreground/80 leading-relaxed">
+            Every collection available in Basic, Standard, and Elite tiers. Same theme, scaled quality to match your budget.
           </p>
         </div>
 

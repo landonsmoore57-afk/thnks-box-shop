@@ -8,14 +8,14 @@ const FeaturedProducts = () => {
   const featuredProducts = products.slice(0, 3);
 
   return (
-    <section className="py-20">
+    <section className="py-24 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mb-4">
-            Featured Gift Collections
+        <div className="text-center mb-16">
+          <h2 className="font-serif text-5xl font-bold mb-6">
+            Featured Collections
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Explore our most popular pre-packaged gift boxes, each available in three quality tiers.
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Explore our most popular gift boxes, each thoughtfully curated and available in Basic, Standard, and Elite tiers.
           </p>
         </div>
 

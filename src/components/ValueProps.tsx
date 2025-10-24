@@ -20,9 +20,10 @@ const ValueProps = () => {
   ];
 
   return (
-    <section className="py-20 bg-card">
+    <section className="py-24 bg-background">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <h2 className="font-serif text-4xl font-bold text-center mb-16">Why Choose Thnks & Co.</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto">
           {props.map((prop, index) => (
             <div key={index} className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 text-accent mb-6">
