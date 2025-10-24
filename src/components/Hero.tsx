@@ -39,13 +39,13 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Link to="/shop">
                 <Button size="lg" className="text-base font-medium px-8 h-14 bg-brand-gold text-brand-navy hover:bg-brand-gold/90">
-                  Explore Collections
+                  Explore Gifts
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/resellers">
-                <Button size="lg" variant="outline" className="text-base px-8 h-14 border-white/30 text-white hover:bg-white/10">
-                  Partnership Opportunities
+                <Button size="lg" variant="outline" className="text-base px-8 h-14 border-white/30 text-white hover:bg-white/10 hover:text-white">
+                  For Resellers
                 </Button>
               </Link>
             </div>

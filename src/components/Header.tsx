@@ -22,7 +22,7 @@ const Header = () => {
               Collections
             </Link>
             <Link to="/resellers" className="text-sm font-medium text-foreground hover:text-brand-gold transition-colors">
-              For Business
+              For Resellers
             </Link>
             <Link to="/about" className="text-sm font-medium text-foreground hover:text-brand-gold transition-colors">
               About
