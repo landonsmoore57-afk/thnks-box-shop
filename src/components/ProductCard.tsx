@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/data/products";
@@ -11,7 +12,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const formattedPrice = (startingPrice / 100).toFixed(0);
 
   return (
-    <a href={`/product/${product.slug}`} className="group block">
+    <Link to={`/product/${product.slug}`} className="group block">
       <div className="bg-card rounded-lg overflow-hidden border border-border hover:shadow-lg transition-all duration-300">
         {/* Image */}
         <div className="aspect-square overflow-hidden bg-muted">
@@ -45,7 +46,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
         </div>
       </div>
-    </a>
+    </Link>
   );
 };
 

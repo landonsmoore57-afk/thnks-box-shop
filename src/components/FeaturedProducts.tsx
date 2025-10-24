@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import ProductCard from "./ProductCard";
 import { products } from "@/data/products";
 import { Button } from "@/components/ui/button";
@@ -25,10 +26,12 @@ const FeaturedProducts = () => {
         </div>
 
         <div className="text-center">
-          <Button size="lg" variant="outline" className="group">
-            View All Products
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
+          <Link to="/shop">
+            <Button size="lg" variant="outline" className="group">
+              View All Products
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

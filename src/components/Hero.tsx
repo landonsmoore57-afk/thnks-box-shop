@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import heroImage from "@/assets/hero-gifts.jpg";
@@ -26,13 +27,17 @@ const Hero = () => {
             Thoughtfully curated gift boxes in three quality tiers. Order in minutes, delight in days.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button size="lg" variant="secondary" className="text-lg font-semibold group">
-              Shop Gift Boxes
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button size="lg" variant="outline" className="text-lg border-accent text-primary-foreground hover:bg-accent/10">
-              For Resellers
-            </Button>
+            <Link to="/shop">
+              <Button size="lg" variant="secondary" className="text-lg font-semibold group">
+                Shop Gift Boxes
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Link to="/resellers">
+              <Button size="lg" variant="outline" className="text-lg border-accent text-primary-foreground hover:bg-accent/10">
+                For Resellers
+              </Button>
+            </Link>
           </div>
 
           {/* Quick Stats */}
