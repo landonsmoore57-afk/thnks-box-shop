@@ -14,14 +14,14 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Space Grotesk', 'Inter', 'sans-serif'],
-        display: ['Space Grotesk', 'sans-serif'],
+        sans: ['Outfit', 'sans-serif'],
+        display: ['Outfit', 'sans-serif'],
       },
       colors: {
-        'brand-teal': "hsl(var(--brand-teal))",
-        'brand-purple': "hsl(var(--brand-purple))",
-        'brand-coral': "hsl(var(--brand-coral))",
-        'brand-blue': "hsl(var(--brand-blue))",
+        'brand-navy': "hsl(var(--brand-navy))",
+        'brand-gold': "hsl(var(--brand-gold))",
+        'brand-slate': "hsl(var(--brand-slate))",
+        'brand-charcoal': "hsl(var(--brand-charcoal))",
         'tier-basic': "hsl(var(--tier-basic))",
         'tier-standard': "hsl(var(--tier-standard))",
         'tier-elite': "hsl(var(--tier-elite))",
