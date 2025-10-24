@@ -8,77 +8,81 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Brand Colors - Thnks & Co */
-    --navy: 212 71% 15%;
-    --gold: 38 71% 52%;
-    --cream: 40 40% 95%;
-    --dark: 220 18% 10%;
+    /* Modern Brand Colors */
+    --brand-teal: 180 95% 45%;
+    --brand-purple: 270 75% 60%;
+    --brand-coral: 15 95% 65%;
+    --brand-blue: 210 100% 56%;
     
     /* Tier Colors */
-    --tier-basic: 142 71% 45%;
-    --tier-standard: 221 83% 53%;
-    --tier-elite: 271 91% 65%;
+    --tier-basic: 142 70% 50%;
+    --tier-standard: 210 100% 56%;
+    --tier-elite: 270 75% 60%;
     
     /* Semantic Tokens */
-    --background: 40 40% 95%;
-    --foreground: 220 18% 10%;
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 18% 10%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 18% 10%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 212 71% 15%;
-    --primary-foreground: 40 40% 95%;
+    --primary: 222 47% 11%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 38 71% 52%;
-    --secondary-foreground: 220 18% 10%;
+    --secondary: 180 95% 45%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 40 20% 88%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 38 71% 52%;
-    --accent-foreground: 220 18% 10%;
+    --accent: 270 75% 60%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 40 40% 95%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 38 30% 85%;
-    --input: 38 30% 85%;
-    --ring: 38 71% 52%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 180 95% 45%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(180 95% 45%) 0%, hsl(210 100% 56%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(270 75% 60%) 0%, hsl(15 95% 65%) 100%);
   }
 
   .dark {
-    --background: 212 71% 15%;
-    --foreground: 40 40% 95%;
+    --background: 222 47% 11%;
+    --foreground: 0 0% 100%;
 
-    --card: 212 60% 20%;
-    --card-foreground: 40 40% 95%;
+    --card: 222 40% 15%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 212 60% 20%;
-    --popover-foreground: 40 40% 95%;
+    --popover: 222 40% 15%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 38 71% 52%;
-    --primary-foreground: 212 71% 15%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 222 47% 11%;
 
-    --secondary: 212 50% 30%;
-    --secondary-foreground: 40 40% 95%;
+    --secondary: 180 95% 45%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 212 40% 25%;
-    --muted-foreground: 40 20% 70%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 38 71% 52%;
-    --accent-foreground: 212 71% 15%;
+    --accent: 270 75% 60%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
-    --destructive-foreground: 40 40% 95%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 212 40% 30%;
-    --input: 212 40% 30%;
-    --ring: 38 71% 52%;
+    --border: 217 33% 25%;
+    --input: 217 33% 25%;
+    --ring: 180 95% 45%;
   }
 }
 
@@ -92,8 +96,8 @@ All colors MUST be HSL.
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    @apply font-bold tracking-tight;
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');

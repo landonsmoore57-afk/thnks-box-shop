@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/data/products";
+import { ArrowRight } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
@@ -13,35 +14,37 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <Link to={`/product/${product.slug}`} className="group block">
-      <div className="bg-card rounded-lg overflow-hidden border border-border hover:shadow-lg transition-all duration-300">
+      <div className="bg-white rounded-2xl overflow-hidden border-2 border-border hover:border-brand-teal hover:shadow-2xl transition-all duration-300 hover:scale-105">
         {/* Image */}
-        <div className="aspect-square overflow-hidden bg-muted">
+        <div className="aspect-square overflow-hidden bg-gradient-to-br from-muted to-muted/50 relative">
           <img 
             src={product.image} 
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
+          <div className="absolute top-4 right-4">
+            <Badge className="bg-white/90 backdrop-blur text-foreground border-0 shadow-lg">
+              {product.category}
+            </Badge>
+          </div>
         </div>
 
         {/* Content */}
         <div className="p-6">
-          <div className="mb-3">
-            <Badge variant="outline" className="mb-2 text-xs">
-              {product.category}
-            </Badge>
-            <h3 className="font-serif text-xl font-bold text-foreground group-hover:text-accent transition-colors">
-              {product.name}
-            </h3>
-            <p className="text-sm text-muted-foreground mt-1">{product.subtitle}</p>
-          </div>
+          <h3 className="font-display text-xl font-bold mb-2 group-hover:text-brand-teal transition-colors">
+            {product.name}
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{product.subtitle}</p>
 
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center justify-between">
             <div>
-              <span className="text-2xl font-bold text-accent">${formattedPrice}</span>
-              <span className="text-sm text-muted-foreground ml-1">starting at</span>
+              <span className="text-3xl font-bold bg-gradient-to-r from-brand-teal to-brand-blue bg-clip-text text-transparent">
+                ${formattedPrice}
+              </span>
+              <span className="text-sm text-muted-foreground ml-2">starting</span>
             </div>
-            <Button variant="outline" size="sm" className="group-hover:bg-accent group-hover:text-accent-foreground group-hover:border-accent transition-all">
-              View Options
+            <Button variant="ghost" size="sm" className="group-hover:bg-brand-teal group-hover:text-white transition-all rounded-full">
+              <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>

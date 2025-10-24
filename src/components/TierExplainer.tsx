@@ -1,75 +1,101 @@
-import { Check } from "lucide-react";
+import { Check, Star } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const TierExplainer = () => {
   const tiers = [
     {
       name: "Basic",
+      tagline: "Essential Quality",
+      description: "Perfect for everyday appreciation and team gifting.",
       color: "tier-basic",
-      description: "Essential quality for everyday appreciation",
+      gradient: "from-green-400 to-emerald-500",
       features: [
-        "Core products from each collection",
+        "Core collection items",
         "Standard packaging",
-        "Ships within 2-3 business days",
-        "Perfect for team gifts"
+        "2-3 day processing",
+        "Ideal for teams"
       ]
     },
     {
       name: "Standard",
+      tagline: "Premium Choice",
+      description: "Elevated quality for clients and special occasions.",
       color: "tier-standard",
-      description: "Premium selections for special occasions",
+      gradient: "from-brand-blue to-brand-teal",
+      isPopular: true,
       features: [
-        "Enhanced product quality",
-        "Premium packaging & presentation",
+        "Enhanced products",
+        "Premium packaging",
         "Priority processing",
-        "Ideal for client gifts"
+        "Perfect for clients"
       ]
     },
     {
       name: "Elite",
+      tagline: "Luxury Experience",
+      description: "Top-tier excellence for VIP recipients.",
       color: "tier-elite",
-      description: "Luxury experiences for VIP recipients",
+      gradient: "from-brand-purple to-brand-coral",
       features: [
-        "Top-tier luxury products",
-        "Custom gift wrap available",
-        "White-glove fulfillment",
-        "Executive-level impressions"
+        "Luxury selections",
+        "Custom gift wrap",
+        "White-glove service",
+        "Executive impressions"
       ]
     }
   ];
 
   return (
-    <section className="py-24 bg-primary text-primary-foreground">
+    <section className="py-24 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 max-w-4xl mx-auto">
-          <h2 className="font-serif text-5xl font-bold mb-6">
+          <h2 className="font-display text-5xl font-bold mb-6">
             Three Tiers, Perfectly Scaled
           </h2>
-          <p className="text-xl text-primary-foreground/80 leading-relaxed">
-            Every collection available in Basic, Standard, and Elite tiers. Same theme, scaled quality to match your budget.
+          <p className="text-xl text-muted-foreground leading-relaxed">
+            Every collection available in three quality levels. Choose the tier that matches your budget and occasion.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {tiers.map((tier, index) => (
-            <div 
+            <Card 
               key={index}
-              className="bg-card text-card-foreground rounded-lg p-8 border-2 border-transparent hover:border-accent transition-all"
+              className={`p-8 relative overflow-hidden border-2 hover:shadow-2xl transition-all duration-300 hover:scale-105 ${
+                tier.isPopular ? 'border-brand-blue' : 'border-border'
+              }`}
             >
-              <div className={`inline-block px-4 py-2 rounded-full bg-${tier.color}/10 text-${tier.color} font-bold mb-4`}>
-                {tier.name}
+              {tier.isPopular && (
+                <div className="absolute top-0 right-0">
+                  <Badge className={`bg-gradient-to-r ${tier.gradient} text-white border-0 rounded-bl-lg rounded-tr-xl px-4 py-1`}>
+                    <Star className="h-3 w-3 mr-1 inline" />
+                    Popular
+                  </Badge>
+                </div>
+              )}
+
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${tier.gradient} mb-6`}>
+                <span className="text-white font-bold text-xl">{tier.name[0]}</span>
               </div>
-              <p className="text-muted-foreground mb-6 min-h-[3rem]">
+
+              <h3 className="font-display text-2xl font-bold mb-2">{tier.name}</h3>
+              <p className="text-sm font-medium text-muted-foreground mb-3">{tier.tagline}</p>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
                 {tier.description}
               </p>
+
               <ul className="space-y-3">
                 {tier.features.map((feature, fIndex) => (
                   <li key={fIndex} className="flex items-start gap-3">
-                    <Check className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+                    <div className={`flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-br ${tier.gradient} flex items-center justify-center mt-0.5`}>
+                      <Check className="h-3 w-3 text-white" />
+                    </div>
                     <span className="text-sm">{feature}</span>
                   </li>
                 ))}
               </ul>
-            </div>
+            </Card>
           ))}
         </div>
       </div>
