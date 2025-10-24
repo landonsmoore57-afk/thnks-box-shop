@@ -1,3 +1,6 @@
+import cookingBoxImg from "@/assets/products/cooking-box.png";
+import modernTableBoxImg from "@/assets/products/modern-table-box.png";
+import bougieBoxImg from "@/assets/products/bougie-box.png";
 import knifeSetImg from "@/assets/products/knife-set.jpg";
 import deskProductivityImg from "@/assets/products/desk-productivity.jpg";
 import wellnessBreakImg from "@/assets/products/wellness-break.jpg";
@@ -29,12 +32,12 @@ export interface Product {
 export const products: Product[] = [
   {
     id: "1",
-    slug: "professional-knife-set",
-    name: "Professional Knife Set",
-    subtitle: "Precision tools for every kitchen",
-    description: "Elevate culinary experiences with our expertly curated knife collections. From essential basics to premium German steel, each tier delivers exceptional cutting performance.",
+    slug: "lets-get-cooking-collection",
+    name: "Let's Get Cooking Collection",
+    subtitle: "Cutlery & Kitchen Tools - Stainless Precision",
+    description: "Everything needed for culinary excellence. From essential utensils to professional-grade tools, this collection elevates any kitchen experience with precision-crafted items.",
     category: "Kitchen",
-    image: knifeSetImg,
+    image: cookingBoxImg,
     isActive: true,
     variants: [
       {
@@ -80,12 +83,12 @@ export const products: Product[] = [
   },
   {
     id: "2",
-    slug: "desk-productivity-essentials",
-    name: "Desk Productivity Essentials",
-    subtitle: "Everything for a focused workday",
-    description: "Transform any workspace with thoughtfully designed desk accessories. Quality tools that inspire productivity and bring sophistication to the daily grind.",
-    category: "Office",
-    image: deskProductivityImg,
+    slug: "modern-table-collection",
+    name: "The Modern Table",
+    subtitle: "Everyday Function. Elevated.",
+    description: "Sophisticated dining essentials that transform ordinary meals into refined experiences. Precision-engineered pieces that balance form and function perfectly.",
+    category: "Dining",
+    image: modernTableBoxImg,
     isActive: true,
     variants: [
       {
@@ -131,51 +134,51 @@ export const products: Product[] = [
   },
   {
     id: "3",
-    slug: "wellness-break-collection",
-    name: "Wellness Break Collection",
-    subtitle: "Moments of calm and restoration",
-    description: "Encourage self-care with curated wellness essentials. From soothing aromatherapy to spa-quality treatments, give the gift of relaxation.",
-    category: "Wellness",
-    image: wellnessBreakImg,
+    slug: "so-bougie-collection",
+    name: "So Bougie Collection",
+    subtitle: "Elevated Style - Crossbodies & Wallets",
+    description: "Luxury accessories that make a statement. Impeccably crafted pieces that combine sophisticated design with everyday practicality.",
+    category: "Accessories",
+    image: bougieBoxImg,
     isActive: true,
     variants: [
       {
         tier: "Basic",
-        sku: "WEL-BAS-003",
-        priceStandard: 4500,
-        priceReseller: 3375,
-        inventory: 55,
+        sku: "ACX-BAS-003",
+        priceStandard: 5900,
+        priceReseller: 4425,
+        inventory: 40,
         specs: [
-          "Aromatherapy candle",
-          "Bath salts",
-          "Tea sampler",
-          "Soft hand towel"
+          "Premium crossbody bag",
+          "Genuine leather wallet",
+          "Card holder set",
+          "Designer gift box"
         ]
       },
       {
         tier: "Standard",
-        sku: "WEL-STD-003",
-        priceStandard: 7500,
-        priceReseller: 5625,
-        inventory: 38,
+        sku: "ACX-STD-003",
+        priceStandard: 9900,
+        priceReseller: 7425,
+        inventory: 28,
         specs: [
-          "Premium spa candle set",
-          "Essential oil diffuser",
-          "Luxury bath collection",
-          "Plush robe & slippers"
+          "Luxury crossbody collection",
+          "Italian leather wallet set",
+          "Premium card accessories",
+          "Monogramming available"
         ]
       },
       {
         tier: "Elite",
-        sku: "WEL-ELT-003",
-        priceStandard: 13900,
-        priceReseller: 10425,
-        inventory: 20,
+        sku: "ACX-ELT-003",
+        priceStandard: 16900,
+        priceReseller: 12675,
+        inventory: 15,
         specs: [
-          "Complete spa experience",
-          "Professional massage tools",
-          "Organic skincare set",
-          "Meditation accessories"
+          "Designer crossbody bags",
+          "Exotic leather wallets",
+          "Complete accessory suite",
+          "Personalized luxury packaging"
         ]
       }
     ]
