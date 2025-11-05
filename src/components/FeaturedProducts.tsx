@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 import ProductCard from "./ProductCard";
 import { products } from "@/data/products";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Package } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import buildBoxHero from "@/assets/build-box-hero.jpg";
 
 const FeaturedProducts = () => {
   const featuredProducts = products.slice(0, 3);
@@ -20,6 +22,34 @@ const FeaturedProducts = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12 max-w-7xl mx-auto">
+          {/* Build Your Box Card */}
+          <Link to="/build-your-box" className="group">
+            <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="aspect-square overflow-hidden bg-muted">
+                <img 
+                  src={buildBoxHero} 
+                  alt="Build Your Box - Custom Gift Collection"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+              <CardContent className="p-6">
+                <div className="flex items-start gap-2 mb-2">
+                  <Package className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                  <h3 className="font-display text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
+                    Build Your Box
+                  </h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Create your perfect custom gift box with three handpicked items
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-foreground">From $100</span>
+                  <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
           {featuredProducts.map(product => (
             <ProductCard key={product.id} product={product} />
           ))}
