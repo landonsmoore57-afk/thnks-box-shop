@@ -224,17 +224,16 @@ const BuildYourBox = () => {
       },
     ];
     
-    for (let i = 0; i < quantity; i++) {
-      addItem({
-        id: `byob-${selectedTier.toLowerCase()}-${Date.now()}-${i}`,
-        slug: "build-your-own-box",
-        name: `Custom ${selectedTier} Box`,
-        image: buildBoxHero,
-        tier: selectedTier,
-        unitPrice: tierPrice,
-        customBoxItems,
-      });
-    }
+    addItem({
+      id: `byob-${selectedTier.toLowerCase()}-${Date.now()}`,
+      slug: "build-your-own-box",
+      name: `Custom ${selectedTier} Box`,
+      image: buildBoxHero,
+      tier: selectedTier,
+      unitPrice: tierPrice,
+      customBoxItems,
+      quantity,
+    });
 
     toast.success(`Added ${quantity} custom box${quantity > 1 ? 'es' : ''} to cart`);
     navigate("/cart");
