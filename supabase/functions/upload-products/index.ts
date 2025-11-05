@@ -79,25 +79,23 @@ serve(async (req) => {
     let successCount = 0;
     let errorCount = 0;
     const errors: string[] = [];
-    const BATCH_SIZE = 50; // Process 50 rows at a time
+    const BATCH_SIZE = 50;
 
     console.log('Starting product and combination processing...');
 
-    // Process in batches
     for (let batchStart = 0; batchStart < jsonData.length; batchStart += BATCH_SIZE) {
       const batchEnd = Math.min(batchStart + BATCH_SIZE, jsonData.length);
       const batch = jsonData.slice(batchStart, batchEnd);
 
-      // Collect all products and combinations for batch insert
-      const productsToUpsert: any[] = [];
-      const combinationsToInsert: any[] = [];
+      // Collect unique products and combination data
+      const productsMap = new Map<string, any>();
+      const rowDataList: any[] = [];
 
       for (let i = 0; i < batch.length; i++) {
         const row = batch[i] as any;
         const rowNum = batchStart + i + 1;
 
         try {
-          // Extract product data
           const products = [
             {
               brand: row['Main BRAND'],
@@ -122,87 +120,91 @@ serve(async (req) => {
             },
           ];
 
-          // Add valid products to batch
+          // Store unique products (avoid duplicates in batch)
           for (const product of products) {
             if (product.model && product.product_name) {
-              productsToUpsert.push(product);
+              productsMap.set(product.model, product);
             }
           }
 
-          // Store row data for later combination creation
-          (row as any)._rowNum = rowNum;
+          // Store row data for combination creation
+          rowDataList.push({
+            rowNum,
+            models: [products[0].model, products[1].model, products[2].model],
+            totalUserPrice: parseFloat(row['Items User Total']?.toString().replace(/[$,]/g, '') || '0'),
+            totalRetailPrice: parseFloat(row['Retail Total']?.toString().replace(/[$,]/g, '') || '0'),
+            packedHeight: parseFloat(row['Packed Height (in)'] || '0'),
+            secondaryTypes: row['Secondary Types'],
+            boxShipCost: parseFloat(row['Box+Ship']?.toString().replace(/[$,]/g, '') || '0'),
+          });
         } catch (rowError) {
           console.error(`Error preparing row ${rowNum}:`, rowError);
-          errors.push(`Row ${rowNum}: ${rowError instanceof Error ? rowError.message : 'Unknown error'}`);
+          errors.push(`Row ${rowNum}: Preparation error`);
           errorCount++;
         }
       }
 
-      // Batch upsert all products
-      if (productsToUpsert.length > 0) {
+      // Batch upsert unique products
+      const uniqueProducts = Array.from(productsMap.values());
+      if (uniqueProducts.length > 0) {
         const { error: upsertError } = await supabaseClient
           .from('products')
-          .upsert(productsToUpsert, {
+          .upsert(uniqueProducts, {
             onConflict: 'model',
             ignoreDuplicates: false
           });
 
         if (upsertError) {
           console.error('Batch upsert error:', upsertError);
+          errorCount += rowDataList.length;
+          continue; // Skip this batch
         }
       }
 
-      // Now get product IDs and create combinations
-      for (let i = 0; i < batch.length; i++) {
-        const row = batch[i] as any;
-        const rowNum = batchStart + i + 1;
+      // Get all product models for this batch
+      const allModels = Array.from(productsMap.keys());
+      
+      // Fetch all product IDs in one query
+      const { data: productData, error: fetchError } = await supabaseClient
+        .from('products')
+        .select('id, model')
+        .in('model', allModels);
 
-        try {
-          const productModels = [
-            row['Main MODEL'],
-            row['Sec1 MODEL'],
-            row['Sec2 MODEL']
-          ].filter(Boolean);
+      if (fetchError || !productData) {
+        console.error('Error fetching products:', fetchError);
+        errorCount += rowDataList.length;
+        continue;
+      }
 
-          if (productModels.length !== 3) {
-            errors.push(`Row ${rowNum}: Missing product models`);
-            errorCount++;
-            continue;
-          }
+      // Create product ID map
+      const productIdMap = new Map(productData.map(p => [p.model, p.id]));
 
-          // Fetch product IDs
-          const { data: productData, error: fetchError } = await supabaseClient
-            .from('products')
-            .select('id, model')
-            .in('model', productModels);
+      // Create combinations
+      const combinationsToInsert: any[] = [];
 
-          if (fetchError || !productData || productData.length !== 3) {
-            errors.push(`Row ${rowNum}: Could not find all products`);
-            errorCount++;
-            continue;
-          }
+      for (const rowData of rowDataList) {
+        const productIds = rowData.models.map((model: string) => productIdMap.get(model));
 
-          // Map products by model
-          const productMap = new Map(productData.map(p => [p.model, p.id]));
-
-          combinationsToInsert.push({
-            tier_id: tierData.id,
-            item1_id: productMap.get(productModels[0]),
-            item2_id: productMap.get(productModels[1]),
-            item3_id: productMap.get(productModels[2]),
-            total_user_price: parseFloat(row['Items User Total']?.toString().replace(/[$,]/g, '') || '0'),
-            total_retail_price: parseFloat(row['Retail Total']?.toString().replace(/[$,]/g, '') || '0'),
-            packed_height: parseFloat(row['Packed Height (in)'] || '0'),
-            secondary_types: row['Secondary Types'],
-            box_ship_cost: parseFloat(row['Box+Ship']?.toString().replace(/[$,]/g, '') || '0'),
-          });
-
-          successCount++;
-        } catch (rowError) {
-          console.error(`Error processing row ${rowNum}:`, rowError);
-          errors.push(`Row ${rowNum}: ${rowError instanceof Error ? rowError.message : 'Unknown error'}`);
+        // Check if all product IDs were found
+        if (productIds.some((id: any) => !id)) {
+          errors.push(`Row ${rowData.rowNum}: Missing products - ${rowData.models.filter((m: string, i: number) => !productIds[i]).join(', ')}`);
           errorCount++;
+          continue;
         }
+
+        combinationsToInsert.push({
+          tier_id: tierData.id,
+          item1_id: productIds[0],
+          item2_id: productIds[1],
+          item3_id: productIds[2],
+          total_user_price: rowData.totalUserPrice,
+          total_retail_price: rowData.totalRetailPrice,
+          packed_height: rowData.packedHeight,
+          secondary_types: rowData.secondaryTypes,
+          box_ship_cost: rowData.boxShipCost,
+        });
+
+        successCount++;
       }
 
       // Batch insert combinations
@@ -218,7 +220,6 @@ serve(async (req) => {
         }
       }
 
-      // Log progress
       console.log(`Processed ${batchEnd}/${jsonData.length} rows (Success: ${successCount}, Errors: ${errorCount})`);
     }
 
