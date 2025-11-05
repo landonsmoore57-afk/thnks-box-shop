@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Minus, Plus, ShoppingCart, Check } from "lucide-react";
-import { toast } from "sonner";
+import { useCart } from "@/context/CartContext";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -34,12 +34,19 @@ const ProductDetail = () => {
     );
   }
 
+  const { addItem } = useCart();
   const selectedVariant = product.variants.find(v => v.tier === selectedTier)!;
   const price = (selectedVariant.priceStandard / 100).toFixed(2);
 
   const handleAddToCart = () => {
-    toast.success("Added to cart!", {
-      description: `${quantity}x ${product.name} (${selectedTier})`,
+    addItem({
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      image: product.image,
+      tier: selectedTier,
+      unitPrice: selectedVariant.priceStandard / 100,
+      quantity,
     });
   };
 

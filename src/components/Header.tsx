@@ -2,8 +2,12 @@ import { ShoppingCart, User, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useCart } from "@/context/CartContext";
+import { MobileNav } from "@/components/MobileNav";
 
 const Header = () => {
+  const { itemCount } = useCart();
+
   return (
     <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4">
@@ -40,14 +44,22 @@ const Header = () => {
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-brand-gold text-brand-navy border-0">
-                  0
-                </Badge>
+                {itemCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-brand-gold text-brand-navy border-0">
+                    {itemCount}
+                  </Badge>
+                )}
               </Button>
             </Link>
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="h-5 w-5" />
-            </Button>
+            <div className="md:hidden">
+              <MobileNav
+                trigger={
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                }
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -1,17 +1,17 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowRight, Minus, Plus, X } from "lucide-react";
+import { ArrowRight, Minus, Plus, X, ShoppingBag } from "lucide-react";
+import { useCart } from "@/context/CartContext";
+import { EmptyState } from "@/components/EmptyState";
 
 const Cart = () => {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const { items, updateQuantity, removeItem, subtotal } = useCart();
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const shipping = subtotal > 0 ? 12.00 : 0;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
@@ -23,42 +23,60 @@ const Cart = () => {
         <div className="container mx-auto px-4 py-12">
           <h1 className="font-serif text-4xl font-bold mb-8">Shopping Cart</h1>
 
-          {cartItems.length === 0 ? (
-            <Card className="p-12 text-center">
-              <p className="text-xl text-muted-foreground mb-6">Your cart is empty</p>
-              <Button onClick={() => navigate("/shop")}>
-                Continue Shopping
-              </Button>
-            </Card>
+          {items.length === 0 ? (
+            <EmptyState
+              icon={ShoppingBag}
+              title="Your cart is empty"
+              description="Add some products to get started"
+              action={{
+                label: "Continue Shopping",
+                onClick: () => navigate("/shop"),
+              }}
+            />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Cart Items */}
               <div className="lg:col-span-2 space-y-4">
-                {cartItems.map((item, index) => (
-                  <Card key={index} className="p-6">
+                {items.map((item) => (
+                  <Card key={`${item.id}-${item.tier}`} className="p-6">
                     <div className="flex gap-6">
-                      <div className="w-24 h-24 rounded-lg bg-muted flex-shrink-0" />
+                      <div className="w-24 h-24 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      </div>
                       <div className="flex-grow">
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <h3 className="font-bold">{item.name}</h3>
                             <p className="text-sm text-muted-foreground">{item.tier} Tier</p>
                           </div>
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => removeItem(item.id, item.tier)}
+                          >
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
                         <div className="flex items-center justify-between mt-4">
                           <div className="flex items-center border border-border rounded-lg">
-                            <Button variant="ghost" size="icon">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => updateQuantity(item.id, item.tier, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                            >
                               <Minus className="h-4 w-4" />
                             </Button>
                             <span className="px-4">{item.quantity}</span>
-                            <Button variant="ghost" size="icon">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => updateQuantity(item.id, item.tier, item.quantity + 1)}
+                            >
                               <Plus className="h-4 w-4" />
                             </Button>
                           </div>
-                          <div className="font-bold">${(item.price * item.quantity).toFixed(2)}</div>
+                          <div className="font-bold">${(item.unitPrice * item.quantity).toFixed(2)}</div>
                         </div>
                       </div>
                     </div>

@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,26 +11,56 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+import { useCart } from "@/context/CartContext";
+import { toast } from "@/hooks/use-toast";
+
+const checkoutSchema = z.object({
+  firstName: z.string().min(2, "First name is required"),
+  lastName: z.string().min(2, "Last name is required"),
+  email: z.string().email("Valid email is required"),
+  phone: z.string().optional(),
+  company: z.string().optional(),
+  address: z.string().min(5, "Street address is required"),
+  address2: z.string().optional(),
+  city: z.string().min(2, "City is required"),
+  state: z.string().min(2, "State is required"),
+  zip: z.string().min(5, "ZIP code is required"),
+  giftMessage: z.string().optional(),
+  cardNumber: z.string().min(13, "Card number is required"),
+  expiry: z.string().regex(/^\d{2}\/\d{2}$/, "Format: MM/YY"),
+  cvv: z.string().min(3, "CVV is required"),
+});
+
+type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const { items, subtotal } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsProcessing(true);
-    
-    setTimeout(() => {
-      toast.success("Order placed successfully!");
-      navigate("/");
-    }, 2000);
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CheckoutFormData>({
+    resolver: zodResolver(checkoutSchema),
+  });
 
-  const subtotal = 0;
-  const shipping = 12.00;
+  const shipping = subtotal > 0 ? 12.00 : 0;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
+
+  const onSubmit = async (data: CheckoutFormData) => {
+    setIsProcessing(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    
+    toast({
+      title: "Order placed!",
+      description: "Your order has been successfully placed.",
+    });
+    
+    navigate("/checkout/success");
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -36,7 +69,7 @@ const Checkout = () => {
         <div className="container mx-auto px-4 py-12">
           <h1 className="font-serif text-4xl font-bold mb-8">Checkout</h1>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Checkout Form */}
               <div className="lg:col-span-2 space-y-6">
@@ -47,20 +80,29 @@ const Checkout = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="firstName">First Name *</Label>
-                        <Input id="firstName" required />
+                        <Input id="firstName" {...register("firstName")} />
+                        {errors.firstName && (
+                          <p className="text-sm text-destructive mt-1">{errors.firstName.message}</p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="lastName">Last Name *</Label>
-                        <Input id="lastName" required />
+                        <Input id="lastName" {...register("lastName")} />
+                        {errors.lastName && (
+                          <p className="text-sm text-destructive mt-1">{errors.lastName.message}</p>
+                        )}
                       </div>
                     </div>
                     <div>
                       <Label htmlFor="email">Email *</Label>
-                      <Input id="email" type="email" required />
+                      <Input id="email" type="email" {...register("email")} />
+                      {errors.email && (
+                        <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="phone">Phone</Label>
-                      <Input id="phone" type="tel" />
+                      <Input id="phone" type="tel" {...register("phone")} />
                     </div>
                   </div>
                 </Card>
@@ -71,28 +113,40 @@ const Checkout = () => {
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="company">Company Name</Label>
-                      <Input id="company" placeholder="Optional" />
+                      <Input id="company" placeholder="Optional" {...register("company")} />
                     </div>
                     <div>
                       <Label htmlFor="address">Street Address *</Label>
-                      <Input id="address" required />
+                      <Input id="address" {...register("address")} />
+                      {errors.address && (
+                        <p className="text-sm text-destructive mt-1">{errors.address.message}</p>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="address2">Apt, Suite, etc.</Label>
-                      <Input id="address2" placeholder="Optional" />
+                      <Input id="address2" placeholder="Optional" {...register("address2")} />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <Label htmlFor="city">City *</Label>
-                        <Input id="city" required />
+                        <Input id="city" {...register("city")} />
+                        {errors.city && (
+                          <p className="text-sm text-destructive mt-1">{errors.city.message}</p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="state">State *</Label>
-                        <Input id="state" required />
+                        <Input id="state" {...register("state")} />
+                        {errors.state && (
+                          <p className="text-sm text-destructive mt-1">{errors.state.message}</p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="zip">ZIP Code *</Label>
-                        <Input id="zip" required />
+                        <Input id="zip" {...register("zip")} />
+                        {errors.zip && (
+                          <p className="text-sm text-destructive mt-1">{errors.zip.message}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -108,6 +162,7 @@ const Checkout = () => {
                       placeholder="Your message will be included with the gift..."
                       rows={4}
                       className="mt-2"
+                      {...register("giftMessage")}
                     />
                   </div>
                 </Card>
@@ -118,16 +173,25 @@ const Checkout = () => {
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="cardNumber">Card Number *</Label>
-                      <Input id="cardNumber" placeholder="1234 5678 9012 3456" required />
+                      <Input id="cardNumber" placeholder="1234 5678 9012 3456" {...register("cardNumber")} />
+                      {errors.cardNumber && (
+                        <p className="text-sm text-destructive mt-1">{errors.cardNumber.message}</p>
+                      )}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="expiry">Expiry Date *</Label>
-                        <Input id="expiry" placeholder="MM/YY" required />
+                        <Input id="expiry" placeholder="MM/YY" {...register("expiry")} />
+                        {errors.expiry && (
+                          <p className="text-sm text-destructive mt-1">{errors.expiry.message}</p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="cvv">CVV *</Label>
-                        <Input id="cvv" placeholder="123" required />
+                        <Input id="cvv" placeholder="123" {...register("cvv")} />
+                        {errors.cvv && (
+                          <p className="text-sm text-destructive mt-1">{errors.cvv.message}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -139,9 +203,26 @@ const Checkout = () => {
                 <Card className="p-6 sticky top-24">
                   <h2 className="font-serif text-2xl font-bold mb-6">Order Summary</h2>
                   
-                  <div className="space-y-4 mb-6">
-                    <p className="text-sm text-muted-foreground">Your cart is empty</p>
-                  </div>
+                  {items.length > 0 ? (
+                    <div className="space-y-3 mb-6">
+                      {items.map((item) => (
+                        <div key={`${item.id}-${item.tier}`} className="flex gap-3 py-2">
+                          <div className="w-16 h-16 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
+                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">{item.tier} × {item.quantity}</p>
+                          </div>
+                          <div className="text-sm font-medium">
+                            ${(item.unitPrice * item.quantity).toFixed(2)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground mb-6">Your cart is empty</p>
+                  )}
 
                   <Separator className="my-6" />
                   
@@ -169,7 +250,7 @@ const Checkout = () => {
                     type="submit" 
                     size="lg" 
                     className="w-full"
-                    disabled={isProcessing}
+                    disabled={isProcessing || items.length === 0}
                   >
                     {isProcessing ? "Processing..." : "Place Order"}
                   </Button>
