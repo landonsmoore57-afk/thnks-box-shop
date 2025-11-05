@@ -203,6 +203,27 @@ const BuildYourBox = () => {
     
     const tierPrice = selectedTier === "Basic" ? 100 : selectedTier === "Standard" ? 200 : 300;
     
+    const customBoxItems = [
+      {
+        brand: item1.brand,
+        productName: item1.productName,
+        image: item1.image,
+        color: item1Color || undefined,
+      },
+      {
+        brand: item2.brand,
+        productName: item2.productName,
+        image: item2.image,
+        color: item2Color || undefined,
+      },
+      {
+        brand: item3.brand,
+        productName: item3.productName,
+        image: item3.image,
+        color: item3Color || undefined,
+      },
+    ];
+    
     for (let i = 0; i < quantity; i++) {
       addItem({
         id: `byob-${selectedTier.toLowerCase()}-${Date.now()}-${i}`,
@@ -211,6 +232,7 @@ const BuildYourBox = () => {
         image: buildBoxHero,
         tier: selectedTier,
         unitPrice: tierPrice,
+        customBoxItems,
       });
     }
 

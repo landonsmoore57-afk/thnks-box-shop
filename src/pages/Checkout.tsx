@@ -204,19 +204,43 @@ const Checkout = () => {
                   <h2 className="font-serif text-2xl font-bold mb-6">Order Summary</h2>
                   
                   {items.length > 0 ? (
-                    <div className="space-y-3 mb-6">
+                    <div className="space-y-4 mb-6">
                       {items.map((item) => (
-                        <div key={`${item.id}-${item.tier}`} className="flex gap-3 py-2">
-                          <div className="w-16 h-16 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
-                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                        <div key={`${item.id}-${item.tier}`} className="space-y-3">
+                          <div className="flex gap-3 py-2">
+                            <div className="w-16 h-16 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
+                              <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">{item.name}</p>
+                              <p className="text-xs text-muted-foreground">{item.tier} × {item.quantity}</p>
+                            </div>
+                            <div className="text-sm font-medium">
+                              ${(item.unitPrice * item.quantity).toFixed(2)}
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate">{item.name}</p>
-                            <p className="text-xs text-muted-foreground">{item.tier} × {item.quantity}</p>
-                          </div>
-                          <div className="text-sm font-medium">
-                            ${(item.unitPrice * item.quantity).toFixed(2)}
-                          </div>
+                          
+                          {item.customBoxItems && item.customBoxItems.length > 0 && (
+                            <div className="pl-4 border-l-2 border-accent/30 space-y-2">
+                              <p className="text-xs font-medium text-muted-foreground mb-2">Includes:</p>
+                              {item.customBoxItems.map((boxItem, idx) => (
+                                <div key={idx} className="flex gap-2 items-start">
+                                  {boxItem.image && (
+                                    <div className="w-10 h-10 rounded bg-muted flex-shrink-0 overflow-hidden">
+                                      <img src={boxItem.image} alt={boxItem.productName} className="w-full h-full object-contain" />
+                                    </div>
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium leading-tight">{boxItem.productName}</p>
+                                    <p className="text-xs text-muted-foreground">{boxItem.brand}</p>
+                                    {boxItem.color && (
+                                      <span className="inline-block mt-0.5 text-xs px-1.5 py-0.5 bg-muted rounded">{boxItem.color}</span>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

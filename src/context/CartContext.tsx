@@ -1,6 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { toast } from "@/hooks/use-toast";
 
+export interface CustomBoxItem {
+  brand: string;
+  productName: string;
+  image?: string;
+  color?: string;
+}
+
 export interface CartItem {
   id: string;
   slug: string;
@@ -9,6 +16,7 @@ export interface CartItem {
   tier: "Basic" | "Standard" | "Elite";
   unitPrice: number;
   quantity: number;
+  customBoxItems?: CustomBoxItem[];
 }
 
 interface CartContextType {
