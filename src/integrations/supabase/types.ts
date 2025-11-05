@@ -14,7 +14,169 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      box_combinations: {
+        Row: {
+          box_ship_cost: number | null
+          created_at: string
+          id: string
+          item1_id: string
+          item2_id: string
+          item3_id: string
+          packed_height: number | null
+          secondary_types: string | null
+          tier_id: string
+          total_retail_price: number
+          total_user_price: number
+        }
+        Insert: {
+          box_ship_cost?: number | null
+          created_at?: string
+          id?: string
+          item1_id: string
+          item2_id: string
+          item3_id: string
+          packed_height?: number | null
+          secondary_types?: string | null
+          tier_id: string
+          total_retail_price: number
+          total_user_price: number
+        }
+        Update: {
+          box_ship_cost?: number | null
+          created_at?: string
+          id?: string
+          item1_id?: string
+          item2_id?: string
+          item3_id?: string
+          packed_height?: number | null
+          secondary_types?: string | null
+          tier_id?: string
+          total_retail_price?: number
+          total_user_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "box_combinations_item1_id_fkey"
+            columns: ["item1_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "box_combinations_item2_id_fkey"
+            columns: ["item2_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "box_combinations_item3_id_fkey"
+            columns: ["item3_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "box_combinations_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "box_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      box_tiers: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          price_point: number
+          tier_name: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          price_point: number
+          tier_name: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          price_point?: number
+          tier_name?: string
+        }
+        Relationships: []
+      }
+      product_variants: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          model_variant: string
+          product_id: string
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          id?: string
+          model_variant: string
+          product_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          model_variant?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          brand: string
+          category: string | null
+          created_at: string
+          id: string
+          model: string
+          product_name: string
+          retail_price: number
+          updated_at: string
+          user_price: number
+        }
+        Insert: {
+          brand: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          model: string
+          product_name: string
+          retail_price: number
+          updated_at?: string
+          user_price: number
+        }
+        Update: {
+          brand?: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          model?: string
+          product_name?: string
+          retail_price?: number
+          updated_at?: string
+          user_price?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
