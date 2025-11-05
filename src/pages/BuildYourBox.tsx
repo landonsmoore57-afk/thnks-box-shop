@@ -329,7 +329,7 @@ const BuildYourBox = () => {
                   <h4 className="font-semibold mb-1 line-clamp-2">{item.productName}</h4>
                   <p className="text-sm text-muted-foreground mb-2">{item.brand}</p>
                   <div className="text-right">
-                    <span className="text-sm text-muted-foreground line-through">${item.retailPrice}</span>
+                    <span className="text-sm font-medium text-brand-gold">${item.retailPrice} Retail Value</span>
                   </div>
                   {item.colors && item.colors.length > 0 && (
                     <Badge variant="outline" className="mt-2">
