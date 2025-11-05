@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Check, Package } from "lucide-react";
+import { ChevronRight, Check, Package, Plus, Minus } from "lucide-react";
 import { type BoxItem } from "@/data/boxCombinations";
 import { useCart } from "@/context/CartContext";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import buildBoxHero from "@/assets/build-box-hero.jpg";
 
 type SelectionStep = "item1" | "item2" | "item3" | "color1" | "color2" | "color3" | null;
 
@@ -27,6 +27,7 @@ const BuildYourBox = () => {
   const [availableItems, setAvailableItems] = useState<BoxItem[]>([]);
   const [allCombinations, setAllCombinations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
 
   const { addItem } = useCart();
   const navigate = useNavigate();
@@ -77,8 +78,8 @@ const BuildYourBox = () => {
     fetchCombinations();
   }, [selectedTier]);
 
-  const handleTierChange = (tier: string) => {
-    setSelectedTier(tier as "Basic" | "Standard" | "Elite");
+  const handleTierChange = (tier: "Basic" | "Standard" | "Elite") => {
+    setSelectedTier(tier);
     setItem1(null);
     setItem2(null);
     setItem3(null);
@@ -90,7 +91,6 @@ const BuildYourBox = () => {
   };
 
   const handleChooseItem1 = () => {
-    // Get unique item1 options from database
     const uniqueItem1s = new Map<string, BoxItem>();
     allCombinations.forEach(combo => {
       if (combo.item1 && !uniqueItem1s.has(combo.item1.model)) {
@@ -126,7 +126,6 @@ const BuildYourBox = () => {
 
   const handleChooseItem2 = () => {
     if (!item1) return;
-    // Get valid item2 options based on selected item1
     const validItem2s = new Map<string, BoxItem>();
     allCombinations
       .filter(combo => combo.item1?.model === item1.model)
@@ -164,7 +163,6 @@ const BuildYourBox = () => {
 
   const handleChooseItem3 = () => {
     if (!item1 || !item2) return;
-    // Get valid item3 options based on selected item1 and item2
     const validItem3s = new Map<string, BoxItem>();
     allCombinations
       .filter(combo => combo.item1?.model === item1.model && combo.item2?.model === item2.model)
@@ -205,15 +203,18 @@ const BuildYourBox = () => {
     
     const tierPrice = selectedTier === "Basic" ? 100 : selectedTier === "Standard" ? 200 : 300;
     
-    addItem({
-      id: `byob-${selectedTier.toLowerCase()}`,
-      slug: "build-your-own-box",
-      name: `Custom ${selectedTier} Box`,
-      image: "/placeholder.svg",
-      tier: selectedTier,
-      unitPrice: tierPrice,
-    });
+    for (let i = 0; i < quantity; i++) {
+      addItem({
+        id: `byob-${selectedTier.toLowerCase()}-${Date.now()}-${i}`,
+        slug: "build-your-own-box",
+        name: `Custom ${selectedTier} Box`,
+        image: buildBoxHero,
+        tier: selectedTier,
+        unitPrice: tierPrice,
+      });
+    }
 
+    toast.success(`Added ${quantity} custom box${quantity > 1 ? 'es' : ''} to cart`);
     navigate("/cart");
   };
 
@@ -227,206 +228,247 @@ const BuildYourBox = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+      
       <main className="flex-grow">
-        <div className="container mx-auto px-4 py-12">
-          {/* Hero Section */}
-          <div className="text-center mb-12">
-            <h1 className="font-serif text-5xl font-bold mb-4">Build Your Own Box</h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Create a custom gift box tailored to your preferences. Choose your tier and select three premium items.
-            </p>
+        {/* Breadcrumbs */}
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Link to="/" className="hover:text-foreground">Home</Link>
+            <ChevronRight className="h-4 w-4" />
+            <span className="text-foreground">Build Your Own Box</span>
           </div>
+        </div>
 
-          {/* Tier Selection */}
-          <div className="max-w-4xl mx-auto mb-12">
-            <Tabs value={selectedTier} onValueChange={handleTierChange}>
-              <TabsList className="grid w-full grid-cols-3 mb-8">
-                <TabsTrigger value="Basic">Basic - $100</TabsTrigger>
-                <TabsTrigger value="Standard">Standard - $200</TabsTrigger>
-                <TabsTrigger value="Elite">Elite - $300</TabsTrigger>
-              </TabsList>
+        <div className="container mx-auto px-4 pb-12">
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+            {/* Left Column - Image */}
+            <div>
+              <div className="aspect-square bg-muted rounded-lg overflow-hidden mb-4">
+                <img 
+                  src={buildBoxHero} 
+                  alt="Build Your Own Box"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
 
-              <TabsContent value={selectedTier}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Package className="h-5 w-5" />
-                      {selectedTier} Tier Box
-                    </CardTitle>
-                    <CardDescription>
-                      {selectedTier === "Basic" && "Perfect starter box with quality essentials"}
-                      {selectedTier === "Standard" && "Premium selection of curated items"}
-                      {selectedTier === "Elite" && "Luxury collection of top-tier products"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Item 1 Selection */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">1. Choose Your First Item</h3>
-                        {item1 && <Check className="h-5 w-5 text-accent" />}
-                      </div>
-                      {!item1 ? (
-                        <Button onClick={handleChooseItem1} variant="outline" className="w-full">
-                          Choose 1st Item
-                        </Button>
-                      ) : (
-                        <div className="p-4 border border-border rounded-lg">
-                          <div className="flex gap-4 items-start">
-                            {item1.image ? (
-                              <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
-                                <img 
-                                  src={item1.image} 
-                                  alt={item1.productName}
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Package className="h-8 w-8 text-muted-foreground" />
-                              </div>
-                            )}
-                            <div className="flex-1 flex justify-between items-start">
-                              <div>
-                                <p className="font-medium">{item1.productName}</p>
-                                <p className="text-sm text-muted-foreground">{item1.brand}</p>
-                                {item1Color && <Badge variant="secondary" className="mt-1">{item1Color}</Badge>}
-                              </div>
-                              <div className="text-right">
-                                <p className="text-sm text-muted-foreground line-through">${item1.retailPrice}</p>
-                                <Button variant="ghost" size="sm" onClick={handleChooseItem1} className="mt-1">
-                                  Change
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+            {/* Right Column - Details */}
+            <div className="space-y-6">
+              <div>
+                <Badge variant="secondary" className="mb-2">Custom Box</Badge>
+                <h1 className="font-serif text-4xl font-bold mb-2">Build Your Own Box</h1>
+                <p className="text-muted-foreground">Create a custom gift box with your choice of premium items</p>
+              </div>
+
+              <div className="text-3xl font-bold text-brand-gold">${tierPrice}.00</div>
+
+              {/* Tier Selection */}
+              <div className="space-y-3">
+                <div className="font-semibold">Select Quality Tier</div>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button
+                    variant={selectedTier === "Basic" ? "default" : "outline"}
+                    onClick={() => handleTierChange("Basic")}
+                    className="h-auto py-3"
+                  >
+                    Basic
+                  </Button>
+                  <Button
+                    variant={selectedTier === "Standard" ? "default" : "outline"}
+                    onClick={() => handleTierChange("Standard")}
+                    className="h-auto py-3"
+                  >
+                    Standard
+                  </Button>
+                  <Button
+                    variant={selectedTier === "Elite" ? "default" : "outline"}
+                    onClick={() => handleTierChange("Elite")}
+                    className="h-auto py-3"
+                  >
+                    Elite
+                  </Button>
+                </div>
+              </div>
+
+              {/* Tier Info Card */}
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold">{selectedTier} Tier</span>
+                    <span className="text-brand-gold font-bold">${tierPrice}.00</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-accent" />
+                      <span>Choose 3 premium items</span>
                     </div>
-
-                    {/* Item 2 Selection */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">2. Choose Your Second Item</h3>
-                        {item2 && <Check className="h-5 w-5 text-accent" />}
-                      </div>
-                      {!item2 ? (
-                        <Button 
-                          onClick={handleChooseItem2} 
-                          variant="outline" 
-                          className="w-full"
-                          disabled={!item1 || (item1.colors !== undefined && !item1Color)}
-                        >
-                          Choose 2nd Item
-                        </Button>
-                      ) : (
-                        <div className="p-4 border border-border rounded-lg">
-                          <div className="flex gap-4 items-start">
-                            {item2.image ? (
-                              <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
-                                <img 
-                                  src={item2.image} 
-                                  alt={item2.productName}
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Package className="h-8 w-8 text-muted-foreground" />
-                              </div>
-                            )}
-                            <div className="flex-1 flex justify-between items-start">
-                              <div>
-                                <p className="font-medium">{item2.productName}</p>
-                                <p className="text-sm text-muted-foreground">{item2.brand}</p>
-                                {item2Color && <Badge variant="secondary" className="mt-1">{item2Color}</Badge>}
-                              </div>
-                              <div className="text-right">
-                                <p className="text-sm text-muted-foreground line-through">${item2.retailPrice}</p>
-                                <Button variant="ghost" size="sm" onClick={handleChooseItem2} className="mt-1">
-                                  Change
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-accent" />
+                      <span>Retail value: ${totalRetailPrice > 0 ? totalRetailPrice.toFixed(2) : '---'}</span>
                     </div>
-
-                    {/* Item 3 Selection */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">3. Choose Your Third Item</h3>
-                        {item3 && <Check className="h-5 w-5 text-accent" />}
-                      </div>
-                      {!item3 ? (
-                        <Button 
-                          onClick={handleChooseItem3} 
-                          variant="outline" 
-                          className="w-full"
-                          disabled={!item2 || (item2.colors !== undefined && !item2Color)}
-                        >
-                          Choose 3rd Item
-                        </Button>
-                      ) : (
-                        <div className="p-4 border border-border rounded-lg">
-                          <div className="flex gap-4 items-start">
-                            {item3.image ? (
-                              <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
-                                <img 
-                                  src={item3.image} 
-                                  alt={item3.productName}
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Package className="h-8 w-8 text-muted-foreground" />
-                              </div>
-                            )}
-                            <div className="flex-1 flex justify-between items-start">
-                              <div>
-                                <p className="font-medium">{item3.productName}</p>
-                                <p className="text-sm text-muted-foreground">{item3.brand}</p>
-                                {item3Color && <Badge variant="secondary" className="mt-1">{item3Color}</Badge>}
-                              </div>
-                              <div className="text-right">
-                                <p className="text-sm text-muted-foreground line-through">${item3.retailPrice}</p>
-                                <Button variant="ghost" size="sm" onClick={handleChooseItem3} className="mt-1">
-                                  Change
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-accent" />
+                      <span>Custom gift packaging included</span>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                    {/* Total & Add to Cart */}
-                    {totalRetailPrice > 0 && (
-                      <div className="pt-6 border-t border-border">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm text-muted-foreground">Retail Value</span>
-                          <span className="text-sm text-muted-foreground line-through">${totalRetailPrice.toFixed(2)}</span>
+              {/* Item Selections */}
+              <div className="space-y-4">
+                <div className="font-semibold">Build Your Box:</div>
+                
+                {/* Item 1 */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>1. First Item</span>
+                    {item1 && <Check className="h-4 w-4 text-accent" />}
+                  </div>
+                  {!item1 ? (
+                    <Button onClick={handleChooseItem1} variant="outline" className="w-full" disabled={loading}>
+                      {loading ? 'Loading...' : 'Choose First Item'}
+                    </Button>
+                  ) : (
+                    <Card className="cursor-pointer hover:border-accent" onClick={handleChooseItem1}>
+                      <CardContent className="p-3 flex gap-3 items-center">
+                        {item1.image ? (
+                          <div className="w-16 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
+                            <img src={item1.image} alt={item1.productName} className="w-full h-full object-contain" />
+                          </div>
+                        ) : (
+                          <div className="w-16 h-16 bg-muted rounded flex items-center justify-center flex-shrink-0">
+                            <Package className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{item1.productName}</p>
+                          <p className="text-xs text-muted-foreground">{item1.brand}</p>
+                          {item1Color && <Badge variant="secondary" className="mt-1 text-xs">{item1Color}</Badge>}
                         </div>
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-lg font-semibold">Box Price</span>
-                          <span className="text-2xl font-bold text-accent">${tierPrice}</span>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                {/* Item 2 */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>2. Second Item</span>
+                    {item2 && <Check className="h-4 w-4 text-accent" />}
+                  </div>
+                  {!item2 ? (
+                    <Button 
+                      onClick={handleChooseItem2} 
+                      variant="outline" 
+                      className="w-full"
+                      disabled={!item1 || (item1.colors !== undefined && !item1Color) || loading}
+                    >
+                      Choose Second Item
+                    </Button>
+                  ) : (
+                    <Card className="cursor-pointer hover:border-accent" onClick={handleChooseItem2}>
+                      <CardContent className="p-3 flex gap-3 items-center">
+                        {item2.image ? (
+                          <div className="w-16 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
+                            <img src={item2.image} alt={item2.productName} className="w-full h-full object-contain" />
+                          </div>
+                        ) : (
+                          <div className="w-16 h-16 bg-muted rounded flex items-center justify-center flex-shrink-0">
+                            <Package className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{item2.productName}</p>
+                          <p className="text-xs text-muted-foreground">{item2.brand}</p>
+                          {item2Color && <Badge variant="secondary" className="mt-1 text-xs">{item2Color}</Badge>}
                         </div>
-                        <Button 
-                          size="lg" 
-                          className="w-full" 
-                          onClick={handleAddToCart}
-                          disabled={!isComplete}
-                        >
-                          Add Custom Box to Cart
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                {/* Item 3 */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>3. Third Item</span>
+                    {item3 && <Check className="h-4 w-4 text-accent" />}
+                  </div>
+                  {!item3 ? (
+                    <Button 
+                      onClick={handleChooseItem3} 
+                      variant="outline" 
+                      className="w-full"
+                      disabled={!item2 || (item2.colors !== undefined && !item2Color) || loading}
+                    >
+                      Choose Third Item
+                    </Button>
+                  ) : (
+                    <Card className="cursor-pointer hover:border-accent" onClick={handleChooseItem3}>
+                      <CardContent className="p-3 flex gap-3 items-center">
+                        {item3.image ? (
+                          <div className="w-16 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
+                            <img src={item3.image} alt={item3.productName} className="w-full h-full object-contain" />
+                          </div>
+                        ) : (
+                          <div className="w-16 h-16 bg-muted rounded flex items-center justify-center flex-shrink-0">
+                            <Package className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{item3.productName}</p>
+                          <p className="text-xs text-muted-foreground">{item3.brand}</p>
+                          {item3Color && <Badge variant="secondary" className="mt-1 text-xs">{item3Color}</Badge>}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
+
+              {/* Quantity */}
+              <div className="space-y-2">
+                <div className="font-semibold text-sm">Quantity</div>
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-lg font-semibold w-12 text-center">{quantity}</span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setQuantity(quantity + 1)}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Add to Cart Button */}
+              <Button 
+                size="lg" 
+                className="w-full" 
+                onClick={handleAddToCart}
+                disabled={!isComplete}
+              >
+                Add to Cart
+              </Button>
+
+              {/* Description */}
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p>
+                  Create your perfect gift box by selecting three premium items from our curated collection. 
+                  Each box is carefully packaged and ready to delight.
+                </p>
+                <p className="font-medium">
+                  Your custom box includes premium packaging, gift card option, and free shipping on orders over $100.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </main>
