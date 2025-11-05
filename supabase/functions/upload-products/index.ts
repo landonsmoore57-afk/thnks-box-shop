@@ -62,6 +62,19 @@ serve(async (req) => {
       throw new Error(`Tier not found: ${tierName}`);
     }
 
+    // Delete existing combinations for this tier to prevent duplicates
+    console.log(`Deleting existing combinations for tier: ${tierName}`);
+    const { error: deleteError } = await supabaseClient
+      .from('box_combinations')
+      .delete()
+      .eq('tier_id', tierData.id);
+
+    if (deleteError) {
+      console.error('Error deleting existing combinations:', deleteError);
+      throw new Error(`Failed to clear existing combinations: ${deleteError.message}`);
+    }
+    console.log('Existing combinations cleared successfully');
+
     // Process data in background
     const processData = async () => {
       let successCount = 0;
