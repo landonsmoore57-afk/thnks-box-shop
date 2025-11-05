@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -7,14 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Check, Package } from "lucide-react";
-import { 
-  getUniqueItem1Options, 
-  getValidItem2Options, 
-  getValidItem3Options,
-  type BoxItem 
-} from "@/data/boxCombinations";
+import { type BoxItem } from "@/data/boxCombinations";
 import { useCart } from "@/context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type SelectionStep = "item1" | "item2" | "item3" | "color1" | "color2" | "color3" | null;
 
@@ -28,13 +25,60 @@ const BuildYourBox = () => {
   const [item3Color, setItem3Color] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<SelectionStep>(null);
   const [availableItems, setAvailableItems] = useState<BoxItem[]>([]);
+  const [allCombinations, setAllCombinations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const { addItem } = useCart();
   const navigate = useNavigate();
 
+  // Fetch box combinations from database
+  useEffect(() => {
+    const fetchCombinations = async () => {
+      try {
+        const tierMap: Record<string, string> = {
+          'Basic': 'basic',
+          'Standard': 'standard',
+          'Elite': 'elite'
+        };
+
+        const { data: tierData } = await supabase
+          .from('box_tiers')
+          .select('id')
+          .eq('tier_name', tierMap[selectedTier])
+          .single();
+
+        if (!tierData) return;
+
+        const { data: combinations, error } = await supabase
+          .from('box_combinations')
+          .select(`
+            *,
+            item1:products!box_combinations_item1_id_fkey(id, brand, model, product_name, user_price, retail_price, image_url),
+            item2:products!box_combinations_item2_id_fkey(id, brand, model, product_name, user_price, retail_price, image_url),
+            item3:products!box_combinations_item3_id_fkey(id, brand, model, product_name, user_price, retail_price, image_url)
+          `)
+          .eq('tier_id', tierData.id);
+
+        if (error) {
+          console.error('Error fetching combinations:', error);
+          toast.error('Failed to load products');
+          return;
+        }
+
+        setAllCombinations(combinations || []);
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error('Failed to load products');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCombinations();
+  }, [selectedTier]);
+
   const handleTierChange = (tier: string) => {
     setSelectedTier(tier as "Basic" | "Standard" | "Elite");
-    // Reset selections when tier changes
     setItem1(null);
     setItem2(null);
     setItem3(null);
@@ -42,11 +86,25 @@ const BuildYourBox = () => {
     setItem2Color(null);
     setItem3Color(null);
     setCurrentStep(null);
+    setLoading(true);
   };
 
   const handleChooseItem1 = () => {
-    const items = getUniqueItem1Options(selectedTier);
-    setAvailableItems(items);
+    // Get unique item1 options from database
+    const uniqueItem1s = new Map<string, BoxItem>();
+    allCombinations.forEach(combo => {
+      if (combo.item1 && !uniqueItem1s.has(combo.item1.model)) {
+        uniqueItem1s.set(combo.item1.model, {
+          brand: combo.item1.brand,
+          model: combo.item1.model,
+          productName: combo.item1.product_name,
+          userPrice: combo.item1.user_price,
+          retailPrice: combo.item1.retail_price,
+          image: combo.item1.image_url
+        });
+      }
+    });
+    setAvailableItems(Array.from(uniqueItem1s.values()));
     setCurrentStep("item1");
   };
 
@@ -68,8 +126,23 @@ const BuildYourBox = () => {
 
   const handleChooseItem2 = () => {
     if (!item1) return;
-    const items = getValidItem2Options(selectedTier, item1.model);
-    setAvailableItems(items);
+    // Get valid item2 options based on selected item1
+    const validItem2s = new Map<string, BoxItem>();
+    allCombinations
+      .filter(combo => combo.item1?.model === item1.model)
+      .forEach(combo => {
+        if (combo.item2 && !validItem2s.has(combo.item2.model)) {
+          validItem2s.set(combo.item2.model, {
+            brand: combo.item2.brand,
+            model: combo.item2.model,
+            productName: combo.item2.product_name,
+            userPrice: combo.item2.user_price,
+            retailPrice: combo.item2.retail_price,
+            image: combo.item2.image_url
+          });
+        }
+      });
+    setAvailableItems(Array.from(validItem2s.values()));
     setCurrentStep("item2");
   };
 
@@ -91,8 +164,23 @@ const BuildYourBox = () => {
 
   const handleChooseItem3 = () => {
     if (!item1 || !item2) return;
-    const items = getValidItem3Options(selectedTier, item1.model, item2.model);
-    setAvailableItems(items);
+    // Get valid item3 options based on selected item1 and item2
+    const validItem3s = new Map<string, BoxItem>();
+    allCombinations
+      .filter(combo => combo.item1?.model === item1.model && combo.item2?.model === item2.model)
+      .forEach(combo => {
+        if (combo.item3 && !validItem3s.has(combo.item3.model)) {
+          validItem3s.set(combo.item3.model, {
+            brand: combo.item3.brand,
+            model: combo.item3.model,
+            productName: combo.item3.product_name,
+            userPrice: combo.item3.user_price,
+            retailPrice: combo.item3.retail_price,
+            image: combo.item3.image_url
+          });
+        }
+      });
+    setAvailableItems(Array.from(validItem3s.values()));
     setCurrentStep("item3");
   };
 
@@ -323,9 +411,19 @@ const BuildYourBox = () => {
                 }}
               >
                 <CardContent className="p-4 flex flex-col h-full">
-                  <div className="aspect-square bg-muted rounded-lg mb-3 flex items-center justify-center">
-                    <Package className="h-12 w-12 text-muted-foreground" />
-                  </div>
+                  {item.image ? (
+                    <div className="aspect-square bg-muted rounded-lg mb-3 overflow-hidden">
+                      <img 
+                        src={item.image} 
+                        alt={item.productName}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="aspect-square bg-muted rounded-lg mb-3 flex items-center justify-center">
+                      <Package className="h-12 w-12 text-muted-foreground" />
+                    </div>
+                  )}
                   <h4 className="font-semibold mb-1 line-clamp-2 min-h-[3rem]">{item.productName}</h4>
                   <p className="text-sm text-muted-foreground mb-2">{item.brand}</p>
                   <div className="text-right mt-auto">
