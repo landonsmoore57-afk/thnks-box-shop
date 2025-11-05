@@ -62,18 +62,8 @@ serve(async (req) => {
       throw new Error(`Tier not found: ${tierName}`);
     }
 
-    // Delete existing combinations for this tier to prevent duplicates
-    console.log(`Deleting existing combinations for tier: ${tierName}`);
-    const { error: deleteError } = await supabaseClient
-      .from('box_combinations')
-      .delete()
-      .eq('tier_id', tierData.id);
-
-    if (deleteError) {
-      console.error('Error deleting existing combinations:', deleteError);
-      throw new Error(`Failed to clear existing combinations: ${deleteError.message}`);
-    }
-    console.log('Existing combinations cleared successfully');
+    // Note: We'll check for duplicates during insertion instead of bulk deleting
+    console.log(`Processing combinations for tier: ${tierName}`);
 
 
     let successCount = 0;
@@ -145,26 +135,43 @@ serve(async (req) => {
 
         // Only create combination if we have all 3 products
         if (productIds.length === 3) {
-          const { error: comboError } = await supabaseClient
+          // Check if this exact combination already exists (all 3 items match)
+          const { data: existingCombo } = await supabaseClient
             .from('box_combinations')
-            .insert({
-              tier_id: tierData.id,
-              item1_id: productIds[0],
-              item2_id: productIds[1],
-              item3_id: productIds[2],
-              total_user_price: parseFloat(row['Items User Total']?.toString().replace(/[$,]/g, '') || '0'),
-              total_retail_price: parseFloat(row['Retail Total']?.toString().replace(/[$,]/g, '') || '0'),
-              packed_height: parseFloat(row['Packed Height (in)'] || '0'),
-              secondary_types: row['Secondary Types'],
-              box_ship_cost: parseFloat(row['Box+Ship']?.toString().replace(/[$,]/g, '') || '0'),
-            });
+            .select('id')
+            .eq('tier_id', tierData.id)
+            .eq('item1_id', productIds[0])
+            .eq('item2_id', productIds[1])
+            .eq('item3_id', productIds[2])
+            .maybeSingle();
 
-          if (comboError) {
-            console.error(`Row ${rowNum}: Error inserting combination:`, comboError);
-            errors.push(`Row ${rowNum}: Failed to create combination`);
-            errorCount++;
+          if (existingCombo) {
+            // Exact combination already exists, skip it
+            console.log(`Row ${rowNum}: Duplicate combination found, skipping`);
+            successCount++; // Count as success since it's already in the database
           } else {
-            successCount++;
+            // Insert new combination
+            const { error: comboError } = await supabaseClient
+              .from('box_combinations')
+              .insert({
+                tier_id: tierData.id,
+                item1_id: productIds[0],
+                item2_id: productIds[1],
+                item3_id: productIds[2],
+                total_user_price: parseFloat(row['Items User Total']?.toString().replace(/[$,]/g, '') || '0'),
+                total_retail_price: parseFloat(row['Retail Total']?.toString().replace(/[$,]/g, '') || '0'),
+                packed_height: parseFloat(row['Packed Height (in)'] || '0'),
+                secondary_types: row['Secondary Types'],
+                box_ship_cost: parseFloat(row['Box+Ship']?.toString().replace(/[$,]/g, '') || '0'),
+              });
+
+            if (comboError) {
+              console.error(`Row ${rowNum}: Error inserting combination:`, comboError);
+              errors.push(`Row ${rowNum}: Failed to create combination`);
+              errorCount++;
+            } else {
+              successCount++;
+            }
           }
         } else {
           errors.push(`Row ${rowNum}: Missing product data (only ${productIds.length}/3 products)`);
