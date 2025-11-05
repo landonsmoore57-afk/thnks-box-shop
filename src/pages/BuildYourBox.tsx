@@ -412,11 +412,11 @@ const BuildYourBox = () => {
               >
                 <CardContent className="p-4 flex flex-col h-full">
                   {item.image ? (
-                    <div className="aspect-square bg-muted rounded-lg mb-3 overflow-hidden">
+                    <div className="aspect-square bg-muted rounded-lg mb-3 overflow-hidden flex items-center justify-center">
                       <img 
                         src={item.image} 
                         alt={item.productName}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                   ) : (
