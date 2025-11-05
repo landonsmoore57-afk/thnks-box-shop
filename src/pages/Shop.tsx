@@ -132,14 +132,8 @@ const Shop = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-navy)/0.6)] to-transparent" />
                         <div className="absolute top-4 right-4">
-                          <div className="px-3 py-1.5 rounded-full bg-[hsl(var(--brand-gold))] text-[hsl(var(--brand-navy))] text-xs font-semibold shadow-lg">
+                          <div className="px-3 py-1.5 rounded bg-white/95 backdrop-blur-sm text-foreground border border-border/50 shadow-lg text-xs font-medium">
                             Custom
-                          </div>
-                        </div>
-                        <div className="absolute bottom-4 left-4 right-4">
-                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm text-xs font-semibold">
-                            <Package className="w-3 h-3" />
-                            Build Your Own
                           </div>
                         </div>
                       </div>
