@@ -115,7 +115,7 @@ const BuildYourBox = () => {
   const handleAddToCart = () => {
     if (!item1 || !item2 || !item3) return;
     
-    const totalPrice = item1.userPrice + item2.userPrice + item3.userPrice;
+    const tierPrice = selectedTier === "Basic" ? 100 : selectedTier === "Standard" ? 200 : 300;
     
     addItem({
       id: `byob-${selectedTier.toLowerCase()}`,
@@ -123,13 +123,14 @@ const BuildYourBox = () => {
       name: `Custom ${selectedTier} Box`,
       image: "/placeholder.svg",
       tier: selectedTier,
-      unitPrice: totalPrice,
+      unitPrice: tierPrice,
     });
 
     navigate("/cart");
   };
 
-  const totalPrice = (item1?.userPrice || 0) + (item2?.userPrice || 0) + (item3?.userPrice || 0);
+  const totalRetailPrice = (item1?.retailPrice || 0) + (item2?.retailPrice || 0) + (item3?.retailPrice || 0);
+  const tierPrice = selectedTier === "Basic" ? 100 : selectedTier === "Standard" ? 200 : 300;
   const isComplete = item1 && item2 && item3 && 
     (!item1.colors || item1Color) && 
     (!item2.colors || item2Color) && 
@@ -189,8 +190,8 @@ const BuildYourBox = () => {
                               <p className="text-sm text-muted-foreground">{item1.brand}</p>
                               {item1Color && <Badge variant="secondary" className="mt-1">{item1Color}</Badge>}
                             </div>
-                            <div className="text-right">
-                              <p className="font-semibold text-accent">${item1.userPrice}</p>
+                             <div className="text-right">
+                              <p className="text-sm text-muted-foreground line-through">${item1.retailPrice}</p>
                               <Button variant="ghost" size="sm" onClick={handleChooseItem1} className="mt-1">
                                 Change
                               </Button>
@@ -224,7 +225,7 @@ const BuildYourBox = () => {
                               {item2Color && <Badge variant="secondary" className="mt-1">{item2Color}</Badge>}
                             </div>
                             <div className="text-right">
-                              <p className="font-semibold text-accent">${item2.userPrice}</p>
+                              <p className="text-sm text-muted-foreground line-through">${item2.retailPrice}</p>
                               <Button variant="ghost" size="sm" onClick={handleChooseItem2} className="mt-1">
                                 Change
                               </Button>
@@ -258,7 +259,7 @@ const BuildYourBox = () => {
                               {item3Color && <Badge variant="secondary" className="mt-1">{item3Color}</Badge>}
                             </div>
                             <div className="text-right">
-                              <p className="font-semibold text-accent">${item3.userPrice}</p>
+                              <p className="text-sm text-muted-foreground line-through">${item3.retailPrice}</p>
                               <Button variant="ghost" size="sm" onClick={handleChooseItem3} className="mt-1">
                                 Change
                               </Button>
@@ -269,11 +270,15 @@ const BuildYourBox = () => {
                     </div>
 
                     {/* Total & Add to Cart */}
-                    {totalPrice > 0 && (
+                    {totalRetailPrice > 0 && (
                       <div className="pt-6 border-t border-border">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm text-muted-foreground">Retail Value</span>
+                          <span className="text-sm text-muted-foreground line-through">${totalRetailPrice.toFixed(2)}</span>
+                        </div>
                         <div className="flex justify-between items-center mb-4">
-                          <span className="text-lg font-semibold">Total</span>
-                          <span className="text-2xl font-bold text-accent">${totalPrice.toFixed(2)}</span>
+                          <span className="text-lg font-semibold">Box Price</span>
+                          <span className="text-2xl font-bold text-accent">${tierPrice}</span>
                         </div>
                         <Button 
                           size="lg" 
@@ -323,8 +328,7 @@ const BuildYourBox = () => {
                   </div>
                   <h4 className="font-semibold mb-1 line-clamp-2">{item.productName}</h4>
                   <p className="text-sm text-muted-foreground mb-2">{item.brand}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-accent">${item.userPrice}</span>
+                  <div className="text-right">
                     <span className="text-sm text-muted-foreground line-through">${item.retailPrice}</span>
                   </div>
                   {item.colors && item.colors.length > 0 && (

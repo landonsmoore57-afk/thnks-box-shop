@@ -64,6 +64,31 @@ export const standard200Combinations: BoxCombination[] = [
     item3: { brand: "KitchenSupply", model: "157BO-2", productName: "Escali - Arti Glass Digital Scale", userPrice: 25.75, retailPrice: 54.95, colors: ["Black Obsidian", "Desert Rose", "Frost White"] },
     totalUserPrice: 161,
     totalRetailPrice: 264.85
+  },
+  // Model 1027327 combinations
+  {
+    tier: "Standard",
+    item1: { brand: "Cangshan", model: "1027327", productName: "3-Piece OLIV Cheese Knife Set w/Acacia Cheese Board", userPrice: 89, retailPrice: 119.95 },
+    item2: { brand: "KitchenSupply", model: "DH10", productName: "Escali - Stelo Waterproof Folding Thermometer", userPrice: 43.75, retailPrice: 89.95 },
+    item3: { brand: "KitchenSupply", model: "KCHZ09007", productName: "Joyce Chen - Original Unlimited Kitchen Scissors, 2 Pack", userPrice: 31.25, retailPrice: 69.95, colors: ["Yellow", "Blue", "White", "Red"] },
+    totalUserPrice: 164,
+    totalRetailPrice: 279.85
+  },
+  {
+    tier: "Standard",
+    item1: { brand: "Cangshan", model: "1027327", productName: "3-Piece OLIV Cheese Knife Set w/Acacia Cheese Board", userPrice: 89, retailPrice: 119.95 },
+    item2: { brand: "KitchenSupply", model: "CF63B", productName: "Escali - Versi Coffee Scale, 6.6 lb", userPrice: 43.75, retailPrice: 89.95 },
+    item3: { brand: "KitchenSupply", model: "KCHZ09007", productName: "Joyce Chen - Original Unlimited Kitchen Scissors, 2 Pack", userPrice: 31.25, retailPrice: 69.95, colors: ["Yellow", "Blue", "White", "Red"] },
+    totalUserPrice: 164,
+    totalRetailPrice: 279.85
+  },
+  {
+    tier: "Standard",
+    item1: { brand: "Cangshan", model: "1027327", productName: "3-Piece OLIV Cheese Knife Set w/Acacia Cheese Board", userPrice: 89, retailPrice: 119.95 },
+    item2: { brand: "KitchenSupply", model: "T115S", productName: "Escali - Tabla Stainless Steel Scale", userPrice: 37.5, retailPrice: 79.95 },
+    item3: { brand: "KitchenSupply", model: "KCHZ09007", productName: "Joyce Chen - Original Unlimited Kitchen Scissors, 2 Pack", userPrice: 31.25, retailPrice: 69.95, colors: ["Yellow", "Blue", "White", "Red"] },
+    totalUserPrice: 157.75,
+    totalRetailPrice: 269.85
   }
 ];
 
