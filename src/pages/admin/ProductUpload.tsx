@@ -5,14 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, FileSpreadsheet, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import * as XLSX from 'xlsx';
 
 const AdminProductUpload = () => {
   const [file, setFile] = useState<File | null>(null);
+  const [tierPrice, setTierPrice] = useState<string>("200");
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
@@ -27,131 +28,39 @@ const AdminProductUpload = () => {
 
     setUploading(true);
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      console.log(`Uploading ${file.name} for $${tierPrice} tier...`);
 
-      console.log(`Processing ${jsonData.length} rows...`);
+      // Create form data
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('tierPrice', tierPrice);
 
-      let successCount = 0;
-      let errorCount = 0;
-
-      // Process each row
-      for (let i = 0; i < jsonData.length; i++) {
-        try {
-          const row = jsonData[i] as any;
-          
-          console.log(`Processing row ${i + 1}/${jsonData.length}`);
-
-          // Extract product data from columns
-          const mainProduct = {
-            brand: row['Main BRAND'],
-            model: row['Main MODEL'],
-            product_name: row['Main PRODUCT NAME'],
-            user_price: parseFloat(row['Main User$']?.toString().replace('$', '') || '0'),
-            retail_price: parseFloat(row['Main Retail$']?.toString().replace('$', '') || '0'),
-          };
-
-          const sec1Product = {
-            brand: row['Sec1 BRAND'],
-            model: row['Sec1 MODEL'],
-            product_name: row['Sec1 PRODUCT NAME'],
-            user_price: parseFloat(row['Sec1 User$']?.toString().replace('$', '') || '0'),
-            retail_price: parseFloat(row['Sec1 Retail$']?.toString().replace('$', '') || '0'),
-          };
-
-          const sec2Product = {
-            brand: row['Sec2 BRAND'],
-            model: row['Sec2 MODEL'],
-            product_name: row['Sec2 PRODUCT NAME'],
-            user_price: parseFloat(row['Sec2 User$']?.toString().replace('$', '') || '0'),
-            retail_price: parseFloat(row['Sec2 Retail$']?.toString().replace('$', '') || '0'),
-          };
-
-          // Upsert products
-          const products = [mainProduct, sec1Product, sec2Product];
-          const productIds: string[] = [];
-
-          for (const product of products) {
-            if (product.model && product.product_name) {
-              const { data: existingProduct } = await supabase
-                .from('products')
-                .select('id')
-                .eq('model', product.model)
-                .maybeSingle();
-
-              if (existingProduct) {
-                productIds.push(existingProduct.id);
-              } else {
-                const { data: newProduct, error } = await supabase
-                  .from('products')
-                  .insert({
-                    brand: product.brand,
-                    model: product.model,
-                    product_name: product.product_name,
-                    user_price: product.user_price,
-                    retail_price: product.retail_price,
-                  })
-                  .select('id')
-                  .single();
-
-                if (error) throw error;
-                if (newProduct) productIds.push(newProduct.id);
-              }
-            }
-          }
-
-          if (productIds.length === 3) {
-            // Determine tier based on retail total or price
-            const retailTotal = parseFloat(row['Retail Total']?.toString().replace('$', '') || '0');
-            let tierName = 'Standard'; // Default
-            if (retailTotal >= 350) {
-              tierName = 'Elite';
-            } else if (retailTotal < 250) {
-              tierName = 'Basic';
-            }
-
-            const { data: tierData } = await supabase
-              .from('box_tiers')
-              .select('id')
-              .eq('tier_name', tierName)
-              .maybeSingle();
-
-            if (tierData) {
-              // Insert box combination
-              await supabase
-                .from('box_combinations')
-                .insert({
-                  tier_id: tierData.id,
-                  item1_id: productIds[0],
-                  item2_id: productIds[1],
-                  item3_id: productIds[2],
-                  total_user_price: parseFloat(row['Items User Total']?.toString().replace('$', '') || '0'),
-                  total_retail_price: retailTotal,
-                  packed_height: parseFloat(row['Packed Height (in)'] || '0'),
-                  secondary_types: row['Secondary Types'],
-                  box_ship_cost: parseFloat(row['Box+Ship']?.toString().replace('$', '') || '0'),
-                });
-
-              successCount++;
-            }
-          }
-        } catch (rowError) {
-          console.error(`Error processing row ${i + 1}:`, rowError);
-          errorCount++;
-        }
-      }
-
-      toast({
-        title: "Upload Complete",
-        description: `Successfully processed ${successCount} combinations. ${errorCount} errors.`,
+      // Call edge function
+      const { data, error } = await supabase.functions.invoke('upload-products', {
+        body: formData,
       });
+
+      if (error) throw error;
+
+      console.log('Upload response:', data);
+
+      if (data.success) {
+        toast({
+          title: "Upload Complete",
+          description: `Successfully processed ${data.successCount} of ${data.totalRows} combinations. ${data.errorCount} errors.`,
+        });
+
+        if (data.errors && data.errors.length > 0) {
+          console.error('Upload errors:', data.errors);
+        }
+      } else {
+        throw new Error(data.error || 'Upload failed');
+      }
     } catch (error) {
-      console.error('Error processing spreadsheet:', error);
+      console.error('Error uploading spreadsheet:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to process spreadsheet",
+        description: error instanceof Error ? error.message : "Failed to upload spreadsheet",
         variant: "destructive",
       });
     } finally {
@@ -190,6 +99,23 @@ const AdminProductUpload = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tier">Box Tier</Label>
+                  <Select value={tierPrice} onValueChange={setTierPrice} disabled={uploading}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select tier" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="100">$100 Box (Basic)</SelectItem>
+                      <SelectItem value="200">$200 Box (Standard)</SelectItem>
+                      <SelectItem value="300">$300 Box (Elite)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Select which box tier this spreadsheet data is for
+                  </p>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="file">Excel File</Label>
                   <Input
