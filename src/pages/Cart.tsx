@@ -57,6 +57,32 @@ const Cart = () => {
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
+                        
+                        {/* Custom Box Items */}
+                        {item.customBoxItems && item.customBoxItems.length > 0 && (
+                          <div className="my-4 p-3 bg-muted/50 rounded-lg border-l-2 border-accent/30">
+                            <p className="text-xs font-medium text-muted-foreground mb-3">Includes:</p>
+                            <div className="space-y-2.5">
+                              {item.customBoxItems.map((boxItem, idx) => (
+                                <div key={idx} className="flex gap-2 items-start">
+                                  {boxItem.image && (
+                                    <div className="w-12 h-12 rounded bg-background flex-shrink-0 overflow-hidden">
+                                      <img src={boxItem.image} alt={boxItem.productName} className="w-full h-full object-contain" />
+                                    </div>
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium leading-tight">{boxItem.productName}</p>
+                                    <p className="text-xs text-muted-foreground">{boxItem.brand}</p>
+                                    {boxItem.color && (
+                                      <span className="inline-block mt-1 text-xs px-2 py-0.5 bg-background rounded border">{boxItem.color}</span>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
                         <div className="flex items-center justify-between mt-4">
                           <div className="flex items-center border border-border rounded-lg">
                             <Button 
