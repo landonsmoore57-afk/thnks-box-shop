@@ -272,17 +272,32 @@ const BuildYourBox = () => {
                         </Button>
                       ) : (
                         <div className="p-4 border border-border rounded-lg">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium">{item1.productName}</p>
-                              <p className="text-sm text-muted-foreground">{item1.brand}</p>
-                              {item1Color && <Badge variant="secondary" className="mt-1">{item1Color}</Badge>}
-                            </div>
-                             <div className="text-right">
-                              <p className="text-sm text-muted-foreground line-through">${item1.retailPrice}</p>
-                              <Button variant="ghost" size="sm" onClick={handleChooseItem1} className="mt-1">
-                                Change
-                              </Button>
+                          <div className="flex gap-4 items-start">
+                            {item1.image ? (
+                              <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+                                <img 
+                                  src={item1.image} 
+                                  alt={item1.productName}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Package className="h-8 w-8 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 flex justify-between items-start">
+                              <div>
+                                <p className="font-medium">{item1.productName}</p>
+                                <p className="text-sm text-muted-foreground">{item1.brand}</p>
+                                {item1Color && <Badge variant="secondary" className="mt-1">{item1Color}</Badge>}
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-muted-foreground line-through">${item1.retailPrice}</p>
+                                <Button variant="ghost" size="sm" onClick={handleChooseItem1} className="mt-1">
+                                  Change
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -306,17 +321,32 @@ const BuildYourBox = () => {
                         </Button>
                       ) : (
                         <div className="p-4 border border-border rounded-lg">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium">{item2.productName}</p>
-                              <p className="text-sm text-muted-foreground">{item2.brand}</p>
-                              {item2Color && <Badge variant="secondary" className="mt-1">{item2Color}</Badge>}
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-muted-foreground line-through">${item2.retailPrice}</p>
-                              <Button variant="ghost" size="sm" onClick={handleChooseItem2} className="mt-1">
-                                Change
-                              </Button>
+                          <div className="flex gap-4 items-start">
+                            {item2.image ? (
+                              <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+                                <img 
+                                  src={item2.image} 
+                                  alt={item2.productName}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Package className="h-8 w-8 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 flex justify-between items-start">
+                              <div>
+                                <p className="font-medium">{item2.productName}</p>
+                                <p className="text-sm text-muted-foreground">{item2.brand}</p>
+                                {item2Color && <Badge variant="secondary" className="mt-1">{item2Color}</Badge>}
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-muted-foreground line-through">${item2.retailPrice}</p>
+                                <Button variant="ghost" size="sm" onClick={handleChooseItem2} className="mt-1">
+                                  Change
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -340,17 +370,32 @@ const BuildYourBox = () => {
                         </Button>
                       ) : (
                         <div className="p-4 border border-border rounded-lg">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium">{item3.productName}</p>
-                              <p className="text-sm text-muted-foreground">{item3.brand}</p>
-                              {item3Color && <Badge variant="secondary" className="mt-1">{item3Color}</Badge>}
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-muted-foreground line-through">${item3.retailPrice}</p>
-                              <Button variant="ghost" size="sm" onClick={handleChooseItem3} className="mt-1">
-                                Change
-                              </Button>
+                          <div className="flex gap-4 items-start">
+                            {item3.image ? (
+                              <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+                                <img 
+                                  src={item3.image} 
+                                  alt={item3.productName}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Package className="h-8 w-8 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 flex justify-between items-start">
+                              <div>
+                                <p className="font-medium">{item3.productName}</p>
+                                <p className="text-sm text-muted-foreground">{item3.brand}</p>
+                                {item3Color && <Badge variant="secondary" className="mt-1">{item3Color}</Badge>}
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-muted-foreground line-through">${item3.retailPrice}</p>
+                                <Button variant="ghost" size="sm" onClick={handleChooseItem3} className="mt-1">
+                                  Change
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
