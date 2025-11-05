@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Upload, LayoutDashboard } from "lucide-react";
+import { Package, Upload, LayoutDashboard, UserPlus } from "lucide-react";
 
 const AdminDashboard = () => {
   return (
@@ -47,6 +47,23 @@ const AdminDashboard = () => {
               <CardContent>
                 <Link to="/admin/upload">
                   <Button className="w-full">Upload Products</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserPlus className="h-5 w-5 text-brand-gold" />
+                  Invite Employee
+                </CardTitle>
+                <CardDescription>
+                  Send invitation to new employees
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link to="/admin/invite">
+                  <Button className="w-full">Invite Employee</Button>
                 </Link>
               </CardContent>
             </Card>

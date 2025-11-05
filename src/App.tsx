@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminOrders from "./pages/admin/Orders";
 import AdminProductUpload from "./pages/admin/ProductUpload";
+import AdminInviteUser from "./pages/admin/InviteUser";
 import { AdminRoute } from "./components/AdminRoute";
 import Auth from "./pages/Auth";
 import AuthResetPassword from "./pages/AuthResetPassword";
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
               <Route path="/admin/upload" element={<AdminRoute><AdminProductUpload /></AdminRoute>} />
+              <Route path="/admin/invite" element={<AdminRoute><AdminInviteUser /></AdminRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
