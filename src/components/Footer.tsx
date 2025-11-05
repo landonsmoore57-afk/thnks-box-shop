@@ -14,7 +14,7 @@ const Footer = () => {
               <span className="font-display font-semibold text-2xl">Thnks & Co.</span>
             </div>
             <p className="text-sm text-white/70 leading-relaxed">
-              Premium corporate gifting solutions for professionals.
+              Premium corporate gifting solutions for professionals wanting to make an impact.
             </p>
           </div>
 
