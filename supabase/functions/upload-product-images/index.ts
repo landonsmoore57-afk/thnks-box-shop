@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { decompress } from 'https://deno.land/x/zip@v1.2.5/mod.ts';
+import JSZip from 'https://esm.sh/jszip@3.10.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -33,124 +33,121 @@ serve(async (req) => {
 
     console.log(`Processing ZIP file: ${zipFile.name}`);
 
-    // Read ZIP file
+    // Read ZIP file into memory
     const zipArrayBuffer = await zipFile.arrayBuffer();
-    const zipBytes = new Uint8Array(zipArrayBuffer);
     
-    // Create temp directory for extraction
-    const tempDir = await Deno.makeTempDir();
-    const zipPath = `${tempDir}/upload.zip`;
+    // Load ZIP with JSZip
+    const zip = await JSZip.loadAsync(zipArrayBuffer);
     
-    // Write ZIP to temp file
-    await Deno.writeFile(zipPath, zipBytes);
-    
-    // Extract ZIP
-    const extractDir = `${tempDir}/extracted`;
-    await decompress(zipPath, extractDir);
-
-    // Read all files from extracted directory
-    const files: { name: string; data: Uint8Array; contentType: string }[] = [];
-    
-    for await (const entry of Deno.readDir(extractDir)) {
-      if (entry.isFile) {
-        const filePath = `${extractDir}/${entry.name}`;
-        const data = await Deno.readFile(filePath);
-        
-        // Get file extension and content type
-        const ext = entry.name.split('.').pop()?.toLowerCase();
-        let contentType = 'image/jpeg';
-        if (ext === 'png') contentType = 'image/png';
-        else if (ext === 'webp') contentType = 'image/webp';
-        else if (ext === 'gif') contentType = 'image/gif';
-        
-        // Extract model number from filename (remove extension)
-        const modelNumber = entry.name.replace(/\.[^/.]+$/, '');
-        
-        files.push({
-          name: modelNumber,
-          data,
-          contentType
-        });
-      }
-    }
-
-    console.log(`Found ${files.length} image files in ZIP`);
+    console.log('ZIP file loaded, extracting images...');
 
     let successCount = 0;
     let errorCount = 0;
     const errors: string[] = [];
 
-    // Process each image
-    for (const file of files) {
-      try {
-        // Find product by model number
-        const { data: product, error: productError } = await supabaseClient
-          .from('products')
-          .select('id, model')
-          .eq('model', file.name)
-          .maybeSingle();
-
-        if (productError) {
-          console.error(`Error finding product ${file.name}:`, productError);
-          errors.push(`${file.name}: Database error`);
-          errorCount++;
-          continue;
-        }
-
-        if (!product) {
-          console.log(`Product not found for model: ${file.name}`);
-          errors.push(`${file.name}: Product not found`);
-          errorCount++;
-          continue;
-        }
-
-        // Upload image to storage
-        const fileName = `${product.model}.${file.contentType.split('/')[1]}`;
-        const { error: uploadError } = await supabaseClient
-          .storage
-          .from('product-images')
-          .upload(fileName, file.data, {
-            contentType: file.contentType,
-            upsert: true
-          });
-
-        if (uploadError) {
-          console.error(`Error uploading image for ${file.name}:`, uploadError);
-          errors.push(`${file.name}: Upload failed`);
-          errorCount++;
-          continue;
-        }
-
-        // Get public URL
-        const { data: { publicUrl } } = supabaseClient
-          .storage
-          .from('product-images')
-          .getPublicUrl(fileName);
-
-        // Update product with image URL
-        const { error: updateError } = await supabaseClient
-          .from('products')
-          .update({ image_url: publicUrl })
-          .eq('id', product.id);
-
-        if (updateError) {
-          console.error(`Error updating product ${file.name}:`, updateError);
-          errors.push(`${file.name}: Failed to update product`);
-          errorCount++;
-          continue;
-        }
-
-        successCount++;
-        console.log(`Successfully processed image for model: ${file.name}`);
-      } catch (error) {
-        console.error(`Error processing ${file.name}:`, error);
-        errors.push(`${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        errorCount++;
+    // Process each file in the ZIP
+    const filePromises: Promise<void>[] = [];
+    
+    zip.forEach((relativePath, file) => {
+      // Skip directories and hidden files
+      if (file.dir || relativePath.startsWith('__MACOSX') || relativePath.startsWith('.')) {
+        return;
       }
-    }
 
-    // Cleanup temp directory
-    await Deno.remove(tempDir, { recursive: true });
+      // Check if it's an image file
+      const ext = relativePath.split('.').pop()?.toLowerCase();
+      if (!['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext || '')) {
+        return;
+      }
+
+      // Extract model number from filename (remove path and extension)
+      const fileName = relativePath.split('/').pop() || '';
+      const modelNumber = fileName.replace(/\.[^/.]+$/, '');
+
+      console.log(`Processing: ${fileName} -> Model: ${modelNumber}`);
+
+      const processPromise = (async () => {
+        try {
+          // Get file data as Uint8Array
+          const fileData = await file.async('uint8array');
+          
+          // Determine content type
+          let contentType = 'image/jpeg';
+          if (ext === 'png') contentType = 'image/png';
+          else if (ext === 'webp') contentType = 'image/webp';
+          else if (ext === 'gif') contentType = 'image/gif';
+
+          // Find product by model number
+          const { data: product, error: productError } = await supabaseClient
+            .from('products')
+            .select('id, model')
+            .eq('model', modelNumber)
+            .maybeSingle();
+
+          if (productError) {
+            console.error(`Error finding product ${modelNumber}:`, productError);
+            errors.push(`${modelNumber}: Database error`);
+            errorCount++;
+            return;
+          }
+
+          if (!product) {
+            console.log(`Product not found for model: ${modelNumber}`);
+            errors.push(`${modelNumber}: Product not found`);
+            errorCount++;
+            return;
+          }
+
+          // Upload image to storage
+          const storageFileName = `${product.model}.${ext}`;
+          const { error: uploadError } = await supabaseClient
+            .storage
+            .from('product-images')
+            .upload(storageFileName, fileData, {
+              contentType,
+              upsert: true
+            });
+
+          if (uploadError) {
+            console.error(`Error uploading image for ${modelNumber}:`, uploadError);
+            errors.push(`${modelNumber}: Upload failed - ${uploadError.message}`);
+            errorCount++;
+            return;
+          }
+
+          // Get public URL
+          const { data: { publicUrl } } = supabaseClient
+            .storage
+            .from('product-images')
+            .getPublicUrl(storageFileName);
+
+          // Update product with image URL
+          const { error: updateError } = await supabaseClient
+            .from('products')
+            .update({ image_url: publicUrl })
+            .eq('id', product.id);
+
+          if (updateError) {
+            console.error(`Error updating product ${modelNumber}:`, updateError);
+            errors.push(`${modelNumber}: Failed to update product`);
+            errorCount++;
+            return;
+          }
+
+          successCount++;
+          console.log(`Successfully processed: ${modelNumber}`);
+        } catch (error) {
+          console.error(`Error processing ${modelNumber}:`, error);
+          errors.push(`${modelNumber}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          errorCount++;
+        }
+      })();
+
+      filePromises.push(processPromise);
+    });
+
+    // Wait for all files to be processed
+    await Promise.all(filePromises);
 
     console.log(`Processing complete. Success: ${successCount}, Errors: ${errorCount}`);
 
@@ -159,8 +156,8 @@ serve(async (req) => {
         success: true,
         successCount,
         errorCount,
-        totalFiles: files.length,
-        errors: errors.slice(0, 20), // Return first 20 errors
+        totalFiles: successCount + errorCount,
+        errors: errors.slice(0, 20),
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
