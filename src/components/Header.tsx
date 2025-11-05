@@ -25,6 +25,9 @@ const Header = () => {
             <Link to="/shop" className="text-sm font-medium text-foreground hover:text-brand-gold transition-colors">
               Explore Gifts
             </Link>
+            <Link to="/build-your-box" className="text-sm font-medium text-foreground hover:text-brand-gold transition-colors">
+              Build Your Box
+            </Link>
             <Link
               to="/resellers"
               className="text-sm font-medium text-foreground hover:text-brand-gold transition-colors"

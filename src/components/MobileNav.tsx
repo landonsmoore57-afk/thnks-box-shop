@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Home, ShoppingBag, Info, Users, Mail, Package, RotateCcw, FileText, Shield } from "lucide-react";
+import { Home, ShoppingBag, Info, Users, Mail, Package, RotateCcw, FileText, Shield, Box } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -33,6 +33,12 @@ export function MobileNav({ trigger }: MobileNavProps) {
             <Button variant="ghost" className="w-full justify-start gap-3" size="lg">
               <ShoppingBag className="h-5 w-5" />
               Explore Gifts
+            </Button>
+          </Link>
+          <Link to="/build-your-box">
+            <Button variant="ghost" className="w-full justify-start gap-3" size="lg">
+              <Box className="h-5 w-5" />
+              Build Your Box
             </Button>
           </Link>
           <Link to="/resellers">
