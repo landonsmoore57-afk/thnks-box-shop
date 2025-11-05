@@ -322,13 +322,13 @@ const BuildYourBox = () => {
                   if (currentStep === "item3") handleSelectItem3(item);
                 }}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-4 flex flex-col h-full">
                   <div className="aspect-square bg-muted rounded-lg mb-3 flex items-center justify-center">
                     <Package className="h-12 w-12 text-muted-foreground" />
                   </div>
-                  <h4 className="font-semibold mb-1 line-clamp-2">{item.productName}</h4>
+                  <h4 className="font-semibold mb-1 line-clamp-2 min-h-[3rem]">{item.productName}</h4>
                   <p className="text-sm text-muted-foreground mb-2">{item.brand}</p>
-                  <div className="text-right">
+                  <div className="text-right mt-auto">
                     <span className="text-sm font-medium text-brand-gold">${item.retailPrice} Retail Value</span>
                   </div>
                   {item.colors && item.colors.length > 0 && (
