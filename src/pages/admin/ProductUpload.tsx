@@ -83,8 +83,13 @@ const AdminProductUpload = () => {
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Upload Excel spreadsheets (.xlsx, .xlsm) with box combination data. 
-                The spreadsheet should include Main, Sec1, and Sec2 product information.
+                <strong>Upload Instructions:</strong>
+                <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
+                  <li>Upload Excel files (.xlsx, .xlsm) with box combination data</li>
+                  <li>File should include Main, Sec1, and Sec2 product information</li>
+                  <li className="text-destructive font-semibold">⚠️ Files with 800+ rows may timeout. Split into smaller batches if needed.</li>
+                  <li>Uploading will delete and replace existing combinations for the selected tier</li>
+                </ul>
               </AlertDescription>
             </Alert>
 
