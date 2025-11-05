@@ -36,7 +36,7 @@ const FeaturedProducts = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-navy)/0.6)] to-transparent" />
                 <div className="absolute top-4 right-4">
-                  <div className="px-3 py-1.5 rounded bg-white/95 backdrop-blur-sm text-foreground border border-border/50 shadow-lg text-xs font-medium">
+                  <div className="px-3 py-1.5 rounded bg-[hsl(var(--brand-gold))] text-[hsl(var(--brand-navy))] shadow-lg text-xs font-semibold">
                     Custom
                   </div>
                 </div>
