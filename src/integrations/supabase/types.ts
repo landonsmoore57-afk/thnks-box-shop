@@ -240,6 +240,7 @@ export type Database = {
           category: string | null
           created_at: string
           id: string
+          image_url: string | null
           model: string
           product_name: string
           retail_price: number
@@ -251,6 +252,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
           model: string
           product_name: string
           retail_price: number
@@ -262,6 +264,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
           model?: string
           product_name?: string
           retail_price?: number
