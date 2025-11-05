@@ -75,129 +75,162 @@ serve(async (req) => {
     }
     console.log('Existing combinations cleared successfully');
 
-    // Process data in background
-    const processData = async () => {
-      let successCount = 0;
-      let errorCount = 0;
-      const errors: string[] = [];
-      const BATCH_SIZE = 10;
 
-      // Process in batches to reduce memory usage
-      for (let batchStart = 0; batchStart < jsonData.length; batchStart += BATCH_SIZE) {
-        const batchEnd = Math.min(batchStart + BATCH_SIZE, jsonData.length);
-        const batch = jsonData.slice(batchStart, batchEnd);
+    let successCount = 0;
+    let errorCount = 0;
+    const errors: string[] = [];
+    const BATCH_SIZE = 50; // Process 50 rows at a time
 
-        // Process batch in parallel
-        await Promise.all(
-          batch.map(async (row: any, index) => {
-            const rowNum = batchStart + index + 1;
-            try {
-              // Extract product data
-              const products = [
-                {
-                  brand: row['Main BRAND'],
-                  model: row['Main MODEL'],
-                  product_name: row['Main PRODUCT NAME'],
-                  user_price: parseFloat(row['Main User$']?.toString().replace(/[$,]/g, '') || '0'),
-                  retail_price: parseFloat(row['Main Retail$']?.toString().replace(/[$,]/g, '') || '0'),
-                },
-                {
-                  brand: row['Sec1 BRAND'],
-                  model: row['Sec1 MODEL'],
-                  product_name: row['Sec1 PRODUCT NAME'],
-                  user_price: parseFloat(row['Sec1 User$']?.toString().replace(/[$,]/g, '') || '0'),
-                  retail_price: parseFloat(row['Sec1 Retail$']?.toString().replace(/[$,]/g, '') || '0'),
-                },
-                {
-                  brand: row['Sec2 BRAND'],
-                  model: row['Sec2 MODEL'],
-                  product_name: row['Sec2 PRODUCT NAME'],
-                  user_price: parseFloat(row['Sec2 User$']?.toString().replace(/[$,]/g, '') || '0'),
-                  retail_price: parseFloat(row['Sec2 Retail$']?.toString().replace(/[$,]/g, '') || '0'),
-                },
-              ];
+    console.log('Starting product and combination processing...');
 
-              const productIds: string[] = [];
+    // Process in batches
+    for (let batchStart = 0; batchStart < jsonData.length; batchStart += BATCH_SIZE) {
+      const batchEnd = Math.min(batchStart + BATCH_SIZE, jsonData.length);
+      const batch = jsonData.slice(batchStart, batchEnd);
 
-              // Upsert each product using upsert for efficiency
-              for (const product of products) {
-                if (!product.model || !product.product_name) continue;
+      // Collect all products and combinations for batch insert
+      const productsToUpsert: any[] = [];
+      const combinationsToInsert: any[] = [];
 
-                const { data, error } = await supabaseClient
-                  .from('products')
-                  .upsert({
-                    brand: product.brand,
-                    model: product.model,
-                    product_name: product.product_name,
-                    user_price: product.user_price,
-                    retail_price: product.retail_price,
-                  }, {
-                    onConflict: 'model',
-                    ignoreDuplicates: false
-                  })
-                  .select('id')
-                  .single();
+      for (let i = 0; i < batch.length; i++) {
+        const row = batch[i] as any;
+        const rowNum = batchStart + i + 1;
 
-                if (error) {
-                  console.error(`Error upserting product ${product.model}:`, error);
-                  continue;
-                }
-                if (data) productIds.push(data.id);
-              }
+        try {
+          // Extract product data
+          const products = [
+            {
+              brand: row['Main BRAND'],
+              model: row['Main MODEL'],
+              product_name: row['Main PRODUCT NAME'],
+              user_price: parseFloat(row['Main User$']?.toString().replace(/[$,]/g, '') || '0'),
+              retail_price: parseFloat(row['Main Retail$']?.toString().replace(/[$,]/g, '') || '0'),
+            },
+            {
+              brand: row['Sec1 BRAND'],
+              model: row['Sec1 MODEL'],
+              product_name: row['Sec1 PRODUCT NAME'],
+              user_price: parseFloat(row['Sec1 User$']?.toString().replace(/[$,]/g, '') || '0'),
+              retail_price: parseFloat(row['Sec1 Retail$']?.toString().replace(/[$,]/g, '') || '0'),
+            },
+            {
+              brand: row['Sec2 BRAND'],
+              model: row['Sec2 MODEL'],
+              product_name: row['Sec2 PRODUCT NAME'],
+              user_price: parseFloat(row['Sec2 User$']?.toString().replace(/[$,]/g, '') || '0'),
+              retail_price: parseFloat(row['Sec2 Retail$']?.toString().replace(/[$,]/g, '') || '0'),
+            },
+          ];
 
-              if (productIds.length === 3) {
-                // Insert box combination
-                const { error: comboError } = await supabaseClient
-                  .from('box_combinations')
-                  .insert({
-                    tier_id: tierData.id,
-                    item1_id: productIds[0],
-                    item2_id: productIds[1],
-                    item3_id: productIds[2],
-                    total_user_price: parseFloat(row['Items User Total']?.toString().replace(/[$,]/g, '') || '0'),
-                    total_retail_price: parseFloat(row['Retail Total']?.toString().replace(/[$,]/g, '') || '0'),
-                    packed_height: parseFloat(row['Packed Height (in)'] || '0'),
-                    secondary_types: row['Secondary Types'],
-                    box_ship_cost: parseFloat(row['Box+Ship']?.toString().replace(/[$,]/g, '') || '0'),
-                  });
-
-                if (comboError) {
-                  console.error(`Error inserting combination for row ${rowNum}:`, comboError);
-                  errors.push(`Row ${rowNum}: ${comboError.message}`);
-                  errorCount++;
-                } else {
-                  successCount++;
-                }
-              } else {
-                errors.push(`Row ${rowNum}: Missing product data`);
-                errorCount++;
-              }
-            } catch (rowError) {
-              console.error(`Error processing row ${rowNum}:`, rowError);
-              errors.push(`Row ${rowNum}: ${rowError instanceof Error ? rowError.message : 'Unknown error'}`);
-              errorCount++;
+          // Add valid products to batch
+          for (const product of products) {
+            if (product.model && product.product_name) {
+              productsToUpsert.push(product);
             }
-          })
-        );
+          }
 
-        // Log progress every batch
-        if (batchEnd % 50 === 0 || batchEnd === jsonData.length) {
-          console.log(`Processed ${batchEnd}/${jsonData.length} rows`);
+          // Store row data for later combination creation
+          (row as any)._rowNum = rowNum;
+        } catch (rowError) {
+          console.error(`Error preparing row ${rowNum}:`, rowError);
+          errors.push(`Row ${rowNum}: ${rowError instanceof Error ? rowError.message : 'Unknown error'}`);
+          errorCount++;
         }
       }
 
-      console.log(`Processing complete. Success: ${successCount}, Errors: ${errorCount}`);
-    };
+      // Batch upsert all products
+      if (productsToUpsert.length > 0) {
+        const { error: upsertError } = await supabaseClient
+          .from('products')
+          .upsert(productsToUpsert, {
+            onConflict: 'model',
+            ignoreDuplicates: false
+          });
 
-    // Start background processing (don't await)
-    processData().catch(err => console.error('Background processing error:', err));
+        if (upsertError) {
+          console.error('Batch upsert error:', upsertError);
+        }
+      }
 
-    // Return immediate response
+      // Now get product IDs and create combinations
+      for (let i = 0; i < batch.length; i++) {
+        const row = batch[i] as any;
+        const rowNum = batchStart + i + 1;
+
+        try {
+          const productModels = [
+            row['Main MODEL'],
+            row['Sec1 MODEL'],
+            row['Sec2 MODEL']
+          ].filter(Boolean);
+
+          if (productModels.length !== 3) {
+            errors.push(`Row ${rowNum}: Missing product models`);
+            errorCount++;
+            continue;
+          }
+
+          // Fetch product IDs
+          const { data: productData, error: fetchError } = await supabaseClient
+            .from('products')
+            .select('id, model')
+            .in('model', productModels);
+
+          if (fetchError || !productData || productData.length !== 3) {
+            errors.push(`Row ${rowNum}: Could not find all products`);
+            errorCount++;
+            continue;
+          }
+
+          // Map products by model
+          const productMap = new Map(productData.map(p => [p.model, p.id]));
+
+          combinationsToInsert.push({
+            tier_id: tierData.id,
+            item1_id: productMap.get(productModels[0]),
+            item2_id: productMap.get(productModels[1]),
+            item3_id: productMap.get(productModels[2]),
+            total_user_price: parseFloat(row['Items User Total']?.toString().replace(/[$,]/g, '') || '0'),
+            total_retail_price: parseFloat(row['Retail Total']?.toString().replace(/[$,]/g, '') || '0'),
+            packed_height: parseFloat(row['Packed Height (in)'] || '0'),
+            secondary_types: row['Secondary Types'],
+            box_ship_cost: parseFloat(row['Box+Ship']?.toString().replace(/[$,]/g, '') || '0'),
+          });
+
+          successCount++;
+        } catch (rowError) {
+          console.error(`Error processing row ${rowNum}:`, rowError);
+          errors.push(`Row ${rowNum}: ${rowError instanceof Error ? rowError.message : 'Unknown error'}`);
+          errorCount++;
+        }
+      }
+
+      // Batch insert combinations
+      if (combinationsToInsert.length > 0) {
+        const { error: comboError } = await supabaseClient
+          .from('box_combinations')
+          .insert(combinationsToInsert);
+
+        if (comboError) {
+          console.error('Batch insert combinations error:', comboError);
+          errorCount += combinationsToInsert.length;
+          successCount -= combinationsToInsert.length;
+        }
+      }
+
+      // Log progress
+      console.log(`Processed ${batchEnd}/${jsonData.length} rows (Success: ${successCount}, Errors: ${errorCount})`);
+    }
+
+    console.log(`Processing complete. Success: ${successCount}, Errors: ${errorCount}`);
+
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Processing ${jsonData.length} rows in background. Check logs for progress.`,
+        successCount,
+        errorCount,
         totalRows: jsonData.length,
+        errors: errors.slice(0, 20),
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
