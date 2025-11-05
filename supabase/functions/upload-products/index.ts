@@ -47,9 +47,9 @@ serve(async (req) => {
     console.log(`Found ${jsonData.length} rows to process`);
 
     // Determine tier name based on price
-    let tierName = 'Standard';
-    if (tierPrice === '100') tierName = 'Basic';
-    else if (tierPrice === '300') tierName = 'Elite';
+    let tierName = 'standard';
+    if (tierPrice === '100') tierName = 'basic';
+    else if (tierPrice === '300') tierName = 'elite';
 
     // Get tier ID
     const { data: tierData, error: tierError } = await supabaseClient
