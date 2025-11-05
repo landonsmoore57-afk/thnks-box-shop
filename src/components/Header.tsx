@@ -1,4 +1,4 @@
-import { ShoppingCart, User, Menu, LogOut } from "lucide-react";
+import { ShoppingCart, User, Menu, LogOut, ChevronDown, Package, Gift } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,12 +40,31 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <Link to="/shop" className="text-sm font-medium text-foreground hover:text-brand-gold transition-colors">
-              Explore Gifts
-            </Link>
-            <Link to="/build-your-box" className="text-sm font-medium text-foreground hover:text-brand-gold transition-colors">
-              Build Your Box
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="text-sm font-medium text-foreground hover:text-brand-gold transition-colors">
+                  Explore Gifts
+                  <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-white">
+                <DropdownMenuItem onClick={() => navigate('/build-your-box')} className="cursor-pointer">
+                  <Package className="mr-2 h-4 w-4 text-brand-gold" />
+                  <div>
+                    <div className="font-semibold">Build Your Box</div>
+                    <div className="text-xs text-muted-foreground">Custom gift selection</div>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/shop')} className="cursor-pointer">
+                  <Gift className="mr-2 h-4 w-4 text-brand-gold" />
+                  <div>
+                    <div className="font-semibold">All Collections</div>
+                    <div className="text-xs text-muted-foreground">Browse curated gifts</div>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Link
               to="/resellers"
               className="text-sm font-medium text-foreground hover:text-brand-gold transition-colors"
@@ -66,7 +85,7 @@ const Header = () => {
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="bg-white">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {isAdmin && (
