@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { products } from "@/data/products";
 import { FiltersBar } from "@/components/FiltersBar";
 import { EmptyState } from "@/components/EmptyState";
-import { PackageX } from "lucide-react";
+import { PackageX, Package, ArrowRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import buildBoxHero from "@/assets/build-box-hero.jpg";
 
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -116,8 +118,50 @@ const Shop = () => {
         {/* Products Grid */}
         <section className="py-12">
           <div className="container mx-auto px-4">
-            {sortedProducts.length > 0 ? (
+            {sortedProducts.length > 0 || selectedCategory === "all" ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {/* Build Your Box Card - Only show when no filters or "all" */}
+                {selectedCategory === "all" && selectedTier === "all" && (
+                  <Link to="/build-your-box" className="group">
+                    <Card className="overflow-hidden border-2 border-[hsl(var(--brand-gold)/0.2)] hover:border-[hsl(var(--brand-gold)/0.5)] hover:shadow-2xl hover:shadow-[hsl(var(--brand-gold)/0.1)] transition-all duration-300 hover:scale-[1.02] bg-gradient-to-br from-background to-[hsl(var(--brand-gold)/0.02)]">
+                      <div className="aspect-square overflow-hidden bg-muted relative">
+                        <img 
+                          src={buildBoxHero} 
+                          alt="Build Your Box - Custom Gift Collection"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-navy)/0.6)] to-transparent" />
+                        <div className="absolute top-4 right-4">
+                          <div className="px-3 py-1.5 rounded-full bg-[hsl(var(--brand-gold))] text-[hsl(var(--brand-navy))] text-xs font-semibold shadow-lg">
+                            Custom
+                          </div>
+                        </div>
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm text-xs font-semibold">
+                            <Package className="w-3 h-3" />
+                            Build Your Own
+                          </div>
+                        </div>
+                      </div>
+                      <CardContent className="p-6">
+                        <h3 className="font-display text-2xl font-bold text-foreground group-hover:text-[hsl(var(--brand-gold))] transition-colors mb-2">
+                          Build Your Box
+                        </h3>
+                        <p className="text-muted-foreground mb-4 leading-relaxed">
+                          Create your perfect custom gift box with three handpicked items
+                        </p>
+                        <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                          <div>
+                            <span className="text-2xl font-bold text-[hsl(var(--brand-gold))]">$100</span>
+                            <span className="text-sm text-muted-foreground ml-2">starting</span>
+                          </div>
+                          <ArrowRight className="w-5 h-5 text-[hsl(var(--brand-gold))] group-hover:translate-x-2 transition-transform" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                )}
+                
                 {sortedProducts.map(product => (
                   <ProductCard key={product.id} product={product} />
                 ))}
